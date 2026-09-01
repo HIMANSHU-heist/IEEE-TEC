@@ -357,6 +357,7 @@
       </div>
       <div class="field-error" id="li-error"></div>
       <button class="btn btn-primary btn-block" onclick="loginWithPassword()">Log in</button>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">New here? <button class="link-btn" type="button" onclick="switchAuthTab('signup')">Sign up instead</button></p>
     </div>
 
     <!-- SIGNUP PANEL (new users) -->
@@ -401,6 +402,7 @@
       </div>
       <div class="field-error" id="ls-error"></div>
       <button class="btn btn-primary btn-block" onclick="signupWithPassword()">Create account</button>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Already have an account? <button class="link-btn" type="button" onclick="switchAuthTab('login')">Log in instead</button></p>
     </div>
 
     <p class="landing-note">Only @ternaengg.ac.in accounts can access this portal.</p>
@@ -498,7 +500,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-  createUserWithEmailAndPassword, signInWithEmailAndPassword
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, fetchSignInMethodsForEmail
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs
@@ -666,6 +668,21 @@ async function loginWithPassword(){
   if(!email.toLowerCase().endsWith('@ternaengg.ac.in')){ showAuthError(errEl,'Use your @ternaengg.ac.in email.'); return; }
 
   try{
+    // Check what this email is actually registered with before trying to
+    // log in — this is what lets us tell "you haven't signed up yet"
+    // apart from "wrong password", and route you to the right screen.
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    if(methods.length === 0){
+      switchAuthTab('signup');
+      $('#ls-email').value = email;
+      showAuthError($('#ls-error'), "We couldn't find an account for this email — sign up below to create one.");
+      toast("This email hasn't signed up yet — please sign up first.");
+      return;
+    }
+    if(!methods.includes('password')){
+      showAuthError(errEl, 'This email signed up with Google — use "Continue with Google" above instead.');
+      return;
+    }
     await signInWithEmailAndPassword(auth, email, password);
     // onAuthStateChanged (single source of truth) picks this up and
     // takes the user into the app — no need to call handleAuthUser here too.
@@ -694,6 +711,16 @@ async function signupWithPassword(){
   if(password !== password2){ showAuthError(errEl,'Passwords do not match.'); return; }
 
   try{
+    // Check first so an already-registered email gets routed to Log in
+    // with a clear message, instead of a raw Firebase error.
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    if(methods.length > 0){
+      switchAuthTab('login');
+      $('#li-email').value = email;
+      showAuthError($('#li-error'), 'An account already exists for this email — log in below.');
+      toast('This email is already registered — please log in instead.');
+      return;
+    }
     // Suppress the onAuthStateChanged listener while we finish creating the
     // Firestore profile doc ourselves — otherwise it fires the instant
     // createUserWithEmailAndPassword signs the user in (before our setDoc
