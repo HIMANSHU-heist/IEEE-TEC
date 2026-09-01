@@ -436,11 +436,42 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
 /* =====================================================================
-   IN-MEMORY MOCK DATABASE
-   (In the real build, all of this lives in Firestore collections —
-   see the deployment notes shared alongside this file.)
+   FIREBASE SETUP (real Auth + Firestore)
+===================================================================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDEEBkp0lTVmpmWBmIsqkgnHlDWhMA_mC8",
+  authDomain: "ieee-tec.firebaseapp.com",
+  projectId: "ieee-tec",
+  storageBucket: "ieee-tec.firebasestorage.app",
+  messagingSenderId: "1011921780389",
+  appId: "1:1011921780389:web:5c11c062eb54b2f77bd74c",
+  measurementId: "G-FBGSQ8H87Q"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const analytics = getAnalytics(fbApp);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+const googleProvider = new GoogleAuthProvider();
+// Best-effort UI hint only — the real domain check happens below (and must
+// also be enforced by Firestore Security Rules; never trust the frontend alone).
+googleProvider.setCustomParameters({ hd: "ternaengg.ac.in" });
+
+/* =====================================================================
+   LOCAL CACHE OF FIRESTORE DATA
+   (Teams / Sessions / Groups below are still an in-memory mock — that
+   conversion is a separate follow-up step. Users are now real.)
 ===================================================================== */
 let DB = {
   users: [
@@ -495,56 +526,51 @@ function userById(id){ return DB.users.find(u=>u.id===id); }
 function teamById(id){ return DB.teams.find(t=>t.id===id); }
 
 /* =====================================================================
-   LOGIN / GOOGLE PICKER MOCK
+   LOGIN — real Firebase Authentication (Google sign-in)
 ===================================================================== */
-function openPicker(){
-  const list = $('#picker-list');
-  list.innerHTML = '';
-  const confirmedUsers = DB.users.filter(u=>u.status==='confirmed' || u.status==='pending');
-  confirmedUsers.forEach(u=>{
-    const row = document.createElement('div');
-    row.className = 'picker-item';
-    row.onclick = ()=>pickAccount(u.id);
-    row.innerHTML = `
-      <div class="picker-avatar" style="background:${avatarColor(u.id)};">${initials(u.name)}</div>
-      <div><div class="name">${u.name}</div><div class="email">${u.email}</div></div>
-    `;
-    list.appendChild(row);
-  });
-  $('#picker-manual').classList.add('hidden');
-  $('#picker-overlay').style.display='flex';
+async function openPicker(){
+  try{
+    const result = await signInWithPopup(auth, googleProvider);
+    await handleAuthUser(result.user);
+  }catch(e){
+    console.error(e);
+    toast('Sign-in failed: '+e.message);
+  }
 }
 function closePicker(){ $('#picker-overlay').style.display='none'; }
-function showManualEntry(){
-  $('#picker-manual').classList.remove('hidden');
-  $('#manual-error').style.display='none';
-}
-function pickAccount(uid){
-  closePicker();
-  loginAs(uid);
-}
-function manualContinue(){
-  const name = $('#manual-name').value.trim();
-  const email = $('#manual-email').value.trim().toLowerCase();
-  if(!name || !email.endsWith('@ternaengg.ac.in')){
-    $('#manual-error').style.display='block';
+function showManualEntry(){ /* Google popup handles account choice now — kept as a no-op so old markup doesn't error. */ }
+function manualContinue(){ /* unused now that sign-in goes through Google directly */ }
+
+// Called after ANY successful Firebase sign-in (fresh popup or restored session).
+async function handleAuthUser(fbUser){
+  if(!fbUser.email || !fbUser.email.toLowerCase().endsWith('@ternaengg.ac.in')){
+    await signOut(auth);
+    toast('Only @ternaengg.ac.in accounts can access this portal.');
     return;
   }
-  closePicker();
-  let existing = DB.users.find(u=>u.email===email);
-  if(existing){ loginAs(existing.id); return; }
-  const newId = 'u'+(DB.users.length+1)+'_'+Date.now().toString().slice(-4);
-  session._pendingSignup = { id:newId, name, email };
-  $('#view-landing').style.display='none';
-  $('#view-signup').style.display='flex';
-  $('#su-name').value = name;
-  $('#su-email').value = email;
+  const userRef = doc(db, 'users', fbUser.uid);
+  const snap = await getDoc(userRef);
+  if(snap.exists()){
+    session.currentUserId = fbUser.uid;
+    await loadUsersFromFirestore();
+    enterApp();
+  } else {
+    // First-time sign-in — collect name + College ID and verify against the whitelist.
+    session._pendingSignup = { id: fbUser.uid, name: fbUser.displayName || '', email: fbUser.email };
+    $('#view-landing').style.display='none';
+    $('#view-signup').style.display='flex';
+    $('#su-name').value = session._pendingSignup.name;
+    $('#su-email').value = session._pendingSignup.email;
+  }
 }
-function loginAs(uid){
-  const u = userById(uid);
-  if(!u){ toast('Account not found'); return; }
-  session.currentUserId = uid;
-  enterApp();
+
+// Pulls the users collection into the local DB cache so the rest of the
+// (still-mock) UI can keep looking people up the way it already does.
+async function loadUsersFromFirestore(){
+  const snap = await getDocs(collection(db, 'users'));
+  if(!snap.empty){
+    DB.users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
 }
 
 /* =====================================================================
