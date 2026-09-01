@@ -662,8 +662,8 @@ function showAuthError(el, message){
 function friendlyAuthError(e){
   const code = e && e.code ? e.code : '';
   if(code.includes('email-already-in-use')) return 'An account already exists for this email — try logging in instead.';
-  if(code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login-credentials')) return 'Incorrect email or password.';
-  if(code.includes('user-not-found')) return 'No account found for this email — sign up first, or use Continue with Google if that\u2019s how you signed up.';
+  if(code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login-credentials')) return 'Incorrect email or password, or this email signed up with Google — try "Continue with Google" instead.';
+  if(code.includes('user-not-found')) return 'No account found for this email — sign up first, or use "Continue with Google" if that\u2019s how you signed up.';
   if(code.includes('weak-password')) return 'Password is too weak — use at least 6 characters.';
   if(code.includes('invalid-email')) return 'That email address looks invalid.';
   if(code.includes('too-many-requests')) return 'Too many attempts — please wait a moment and try again.';
@@ -681,21 +681,6 @@ async function loginWithPassword(){
   if(!email.toLowerCase().endsWith('@ternaengg.ac.in')){ showAuthError(errEl,'Use your @ternaengg.ac.in email.'); return; }
 
   try{
-    // Check what this email is actually registered with before trying to
-    // log in — this is what lets us tell "you haven't signed up yet"
-    // apart from "wrong password", and route you to the right screen.
-    const methods = await fetchSignInMethodsForEmail(auth, email);
-    if(methods.length === 0){
-      switchAuthTab('signup');
-      $('#ls-email').value = email;
-      showAuthError($('#ls-error'), "We couldn't find an account for this email — sign up below to create one.");
-      toast("This email hasn't signed up yet — please sign up first.");
-      return;
-    }
-    if(!methods.includes('password')){
-      showAuthError(errEl, 'This email signed up with Google — use "Continue with Google" above instead.');
-      return;
-    }
     session._freshSignIn = true;
     await signInWithEmailAndPassword(auth, email, password);
     // onAuthStateChanged (single source of truth) picks this up and
@@ -726,16 +711,6 @@ async function signupWithPassword(){
   if(password !== password2){ showAuthError(errEl,'Passwords do not match.'); return; }
 
   try{
-    // Check first so an already-registered email gets routed to Log in
-    // with a clear message, instead of a raw Firebase error.
-    const methods = await fetchSignInMethodsForEmail(auth, email);
-    if(methods.length > 0){
-      switchAuthTab('login');
-      $('#li-email').value = email;
-      showAuthError($('#li-error'), 'An account already exists for this email — log in below.');
-      toast('This email is already registered — please log in instead.');
-      return;
-    }
     // Suppress the onAuthStateChanged listener while we finish creating the
     // Firestore profile doc ourselves — otherwise it fires the instant
     // createUserWithEmailAndPassword signs the user in (before our setDoc
@@ -753,7 +728,16 @@ async function signupWithPassword(){
     enterApp();
   }catch(e){
     console.error(e);
-    showAuthError(errEl, friendlyAuthError(e));
+    if(e && e.code && e.code.includes('email-already-in-use')){
+      // Account already exists — route to Log in with a clear message
+      // instead of a raw Firebase error.
+      switchAuthTab('login');
+      $('#li-email').value = email;
+      showAuthError($('#li-error'), 'An account already exists for this email — log in below.');
+      toast('This email is already registered — please log in instead.');
+    } else {
+      showAuthError(errEl, friendlyAuthError(e));
+    }
   }finally{
     session._suppressAuthListener = false;
   }
