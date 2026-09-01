@@ -451,6 +451,7 @@
 
     <div class="field-error" id="su-error">Please fill your name and college ID before continuing.</div>
     <button class="btn btn-primary btn-block" onclick="completeSignup()">Create account</button>
+    <button class="btn btn-block" style="margin-top:10px;" onclick="cancelGoogleSignup()" type="button">Cancel &amp; sign out</button>
   </div>
 </div>
 
@@ -531,7 +532,7 @@ googleProvider.setCustomParameters({ hd: "ternaengg.ac.in" });
    There is no seed/mock data. Empty arrays until Firestore says otherwise.
 ===================================================================== */
 let DB = { users: [], teams: [], sessions: [], groups: [], teamRequests: [] };
-let session = { currentUserId: null, _pendingSignup: null, _suppressAuthListener: false };
+let session = { currentUserId: null, _pendingSignup: null, _suppressAuthListener: false, _freshSignIn: false };
 let currentPage = 'home';
 
 /* ---------------- helpers ---------------- */
@@ -594,12 +595,14 @@ async function ensureLeadershipGroupHasMember(uid){
 ===================================================================== */
 async function openPicker(){
   try{
+    session._freshSignIn = true;
     await signInWithPopup(auth, googleProvider);
     // Don't call handleAuthUser here — onAuthStateChanged below is the
     // single source of truth and will fire right after this resolves.
     // Calling it from both places caused the race that showed the
     // wrong (password-less) screen intermittently.
   }catch(e){
+    session._freshSignIn = false;
     console.error(e);
     toast('Sign-in failed: '+e.message);
   }
@@ -610,21 +613,31 @@ async function handleAuthUser(fbUser){
   if(!fbUser.email || !fbUser.email.toLowerCase().endsWith('@ternaengg.ac.in')){
     await signOut(auth);
     toast('Only @ternaengg.ac.in accounts can access this portal.');
+    session._freshSignIn = false;
     return;
   }
   const userRef = doc(db, 'users', fbUser.uid);
   const snap = await getDoc(userRef);
   if(snap.exists()){
     session.currentUserId = fbUser.uid;
+    session._freshSignIn = false;
     await loadAllData();
     enterApp();
-  } else {
-    // First-time sign-in — collect name + College ID before creating the account.
+  } else if(session._freshSignIn){
+    // First-time sign-in from an explicit, fresh click — collect name +
+    // College ID before creating the account.
+    session._freshSignIn = false;
     session._pendingSignup = { id: fbUser.uid, name: fbUser.displayName || '', email: fbUser.email };
     $('#view-landing').style.display='none';
     $('#view-signup').style.display='flex';
     $('#su-name').value = session._pendingSignup.name;
     $('#su-email').value = session._pendingSignup.email;
+  } else {
+    // A dangling/incomplete account got auto-restored on page load (e.g. a
+    // Google sign-in that was started but never finished earlier). Don't
+    // hijack the screen with the completion form — just sign it out quietly
+    // so the person lands on a clean landing page and can start over.
+    await signOut(auth);
   }
 }
 
@@ -683,10 +696,12 @@ async function loginWithPassword(){
       showAuthError(errEl, 'This email signed up with Google — use "Continue with Google" above instead.');
       return;
     }
+    session._freshSignIn = true;
     await signInWithEmailAndPassword(auth, email, password);
     // onAuthStateChanged (single source of truth) picks this up and
     // takes the user into the app — no need to call handleAuthUser here too.
   }catch(e){
+    session._freshSignIn = false;
     console.error(e);
     showAuthError(errEl, friendlyAuthError(e));
   }
@@ -751,6 +766,14 @@ function selectRole(input){
   const scope = input.closest('.role-options') || document;
   scope.querySelectorAll('.role-opt').forEach(o=>o.classList.remove('active'));
   input.closest('.role-opt').classList.add('active');
+}
+async function cancelGoogleSignup(){
+  session._pendingSignup = null;
+  session._freshSignIn = false;
+  await signOut(auth);
+  $('#view-signup').style.display='none';
+  $('#view-landing').style.display='flex';
+  switchAuthTab('login');
 }
 async function completeSignup(){
   const name = $('#su-name').value.trim();
@@ -1393,7 +1416,7 @@ $('#modal-overlay').addEventListener('click', (e)=>{
 Object.assign(window, {
   openPicker,
   switchAuthTab, loginWithPassword, signupWithPassword,
-  selectRole, completeSignup,
+  selectRole, completeSignup, cancelGoogleSignup,
   navigate, logout,
   openAssignModal, openCreateTeamModal, createTeam,
   openEditTeamModal, saveTeamSize, confirmPosition, rejectPosition,
