@@ -529,7 +529,7 @@ googleProvider.setCustomParameters({ hd: "ternaengg.ac.in" });
    There is no seed/mock data. Empty arrays until Firestore says otherwise.
 ===================================================================== */
 let DB = { users: [], teams: [], sessions: [], groups: [], teamRequests: [] };
-let session = { currentUserId: null, _pendingSignup: null };
+let session = { currentUserId: null, _pendingSignup: null, _suppressAuthListener: false };
 let currentPage = 'home';
 
 /* ---------------- helpers ---------------- */
@@ -592,8 +592,11 @@ async function ensureLeadershipGroupHasMember(uid){
 ===================================================================== */
 async function openPicker(){
   try{
-    const result = await signInWithPopup(auth, googleProvider);
-    await handleAuthUser(result.user);
+    await signInWithPopup(auth, googleProvider);
+    // Don't call handleAuthUser here — onAuthStateChanged below is the
+    // single source of truth and will fire right after this resolves.
+    // Calling it from both places caused the race that showed the
+    // wrong (password-less) screen intermittently.
   }catch(e){
     console.error(e);
     toast('Sign-in failed: '+e.message);
@@ -663,8 +666,9 @@ async function loginWithPassword(){
   if(!email.toLowerCase().endsWith('@ternaengg.ac.in')){ showAuthError(errEl,'Use your @ternaengg.ac.in email.'); return; }
 
   try{
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    await handleAuthUser(cred.user);
+    await signInWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged (single source of truth) picks this up and
+    // takes the user into the app — no need to call handleAuthUser here too.
   }catch(e){
     console.error(e);
     showAuthError(errEl, friendlyAuthError(e));
@@ -690,6 +694,11 @@ async function signupWithPassword(){
   if(password !== password2){ showAuthError(errEl,'Passwords do not match.'); return; }
 
   try{
+    // Suppress the onAuthStateChanged listener while we finish creating the
+    // Firestore profile doc ourselves — otherwise it fires the instant
+    // createUserWithEmailAndPassword signs the user in (before our setDoc
+    // below has run) and incorrectly routes to the "first-time" screen.
+    session._suppressAuthListener = true;
     // Firebase Auth stores/hashes the password itself — the app never
     // touches or persists the raw password anywhere.
     const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -703,6 +712,8 @@ async function signupWithPassword(){
   }catch(e){
     console.error(e);
     showAuthError(errEl, friendlyAuthError(e));
+  }finally{
+    session._suppressAuthListener = false;
   }
 }
 
@@ -1366,8 +1377,14 @@ Object.assign(window, {
   closeModal
 });
 
-/* Restore session on page reload / re-visit, using real Firebase Auth state. */
+/* Restore session on page reload / re-visit, using real Firebase Auth state.
+   This is the ONLY place that calls handleAuthUser — openPicker and
+   loginWithPassword deliberately don't call it too, to avoid the race
+   that used to show the wrong screen. signupWithPassword sets
+   session._suppressAuthListener while it creates the Firestore profile
+   itself, so this listener steps aside during that window. */
 onAuthStateChanged(auth, (fbUser) => {
+  if(session._suppressAuthListener) return;
   if (fbUser) {
     handleAuthUser(fbUser);
   }
