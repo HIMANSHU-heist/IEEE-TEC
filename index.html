@@ -6,6 +6,7 @@
 <title>IEEE-TEC Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root{
     --navy:#003B5C;
@@ -25,6 +26,7 @@
     --radius:12px;
     --radius-sm:8px;
     --gap:16px;
+    --glow: 0 0 0 rgba(0,98,155,0);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{-webkit-text-size-adjust:100%;}
@@ -126,7 +128,9 @@
     padding:11px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);
     font-size:14px;font-weight:600;background:#fff;color:var(--text);
     min-height:42px;
+    transition:transform .1s ease, box-shadow .15s ease, background .15s ease;
   }
+  .btn:active{ transform:scale(0.97); }
   .btn:hover{background:#f5f6f7;}
   .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
   .btn-primary:hover{background:#004f80;}
@@ -193,7 +197,9 @@
   .card{
     background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
     padding:18px 20px;
+    transition:box-shadow .18s ease, transform .18s ease;
   }
+  .card:hover{ box-shadow:0 10px 26px rgba(0,25,45,0.08); }
   .card h3{font-size:14px;font-weight:700;margin-bottom:14px;}
   .card-stat{border-left:3px solid var(--blue); padding:16px 18px;}
   .card-stat.accent-navy{border-left-color:var(--navy);}
@@ -326,6 +332,167 @@
     .modal{padding:20px 18px;}
     .msg{max-width:88%;}
   }
+
+  /* =====================================================================
+     IEEE-TEC visual refresh — circuitry theme, hamburger drawer,
+     notification bell, feedback / QR components
+  ===================================================================== */
+  .landing{
+    position:relative; overflow:hidden;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(242,169,0,0.14) 0%, transparent 45%),
+      radial-gradient(circle at 85% 75%, rgba(0,180,255,0.16) 0%, transparent 50%),
+      linear-gradient(160deg,#00243A 0%,#003B5C 45%,#00507E 100%);
+  }
+  .landing::before{
+    content:'';position:absolute;inset:0;opacity:0.16;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.35) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(circle at 50% 40%, black 0%, transparent 72%);
+  }
+  .landing::after{
+    content:'\26A1 IEEE \00B7 TERNA ENGINEERING COLLEGE \00B7 STUDENT BRANCH \26A1';
+    position:absolute; left:0; right:0; bottom:18px; text-align:center;
+    font-size:10.5px; letter-spacing:2px; color:rgba(255,255,255,0.28); font-weight:700;
+    pointer-events:none;
+  }
+  .landing-card{ position:relative; z-index:1; box-shadow:0 25px 70px rgba(0,15,30,0.5), var(--glow); animation:cardIn .5s ease; }
+  @keyframes cardIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  .brand-mark{
+    background:linear-gradient(135deg,var(--navy),var(--blue) 60%,#0090c9);
+    box-shadow:0 0 0 4px var(--gold-light), 0 10px 24px rgba(0,59,92,0.35);
+    position:relative;
+  }
+  .brand-mark::after{
+    content:'\26A1'; position:absolute; right:-6px; bottom:-6px; font-size:14px;
+    background:var(--gold); color:var(--navy); width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  /* ---- App shell header polish ---- */
+  .sidebar{
+    background:linear-gradient(190deg,var(--navy) 0%, #002944 100%);
+    position:relative;
+  }
+  .sidebar::before{
+    content:''; position:absolute; inset:0; opacity:0.06; pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+    background-size:28px 28px;
+  }
+  .sidebar .brand .mark{ box-shadow:0 0 12px rgba(242,169,0,0.55); }
+  .nav-item{ transition:background .15s, transform .1s, padding-left .15s; position:relative; z-index:1; }
+  .nav-item:hover{ padding-left:16px; }
+  .nav-item.active{ box-shadow:inset 3px 0 0 var(--gold); }
+  .nav-item .ic{ font-size:17px; }
+
+  .topbar{ gap:10px; }
+  .topbar-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .hamburger-btn{
+    display:none; align-items:center; justify-content:center;
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border);
+    background:#fff;font-size:18px;flex-shrink:0;
+  }
+  .hamburger-btn:active{ background:var(--blue-light); }
+  .topbar-right{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+
+  /* ---- Notification bell ---- */
+  .bell-wrap{ position:relative; }
+  .bell-btn{
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border);
+    background:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .bell-dot{
+    position:absolute; top:5px; right:6px; width:9px;height:9px;border-radius:50%;
+    background:var(--danger); border:2px solid #fff; display:none;
+  }
+  .bell-dot.show{ display:block; }
+  .bell-panel{
+    position:absolute; top:46px; right:0; width:320px; max-width:88vw;
+    background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:0 20px 50px rgba(0,20,40,0.22); z-index:70; display:none; overflow:hidden;
+  }
+  .bell-panel.show{ display:block; }
+  .bell-panel-head{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--border); }
+  .bell-panel-head h4{ font-size:13px; font-weight:700; }
+  .bell-list{ max-height:340px; overflow-y:auto; }
+  .bell-item{ padding:11px 14px; border-bottom:1px solid #EEF1F3; font-size:12.5px; }
+  .bell-item:last-child{ border-bottom:none; }
+  .bell-item.unread{ background:var(--blue-light); }
+  .bell-item .bt{ font-weight:600; margin-bottom:2px; }
+  .bell-item .bs{ color:var(--text-muted); font-size:11px; }
+
+  /* ---- Hamburger drawer (mobile full nav) ---- */
+  .drawer-overlay{
+    position:fixed; inset:0; background:rgba(10,20,30,0.5); z-index:90;
+    display:none;
+  }
+  .drawer-overlay.show{ display:block; }
+  .drawer{
+    position:fixed; top:0; left:0; bottom:0; width:262px; max-width:80vw;
+    background:linear-gradient(190deg,var(--navy) 0%, #002944 100%); color:#fff;
+    z-index:95; transform:translateX(-100%); transition:transform .22s ease;
+    display:flex; flex-direction:column; padding:20px 14px;
+  }
+  .drawer.show{ transform:translateX(0); }
+  .drawer .brand{ display:flex; align-items:center; gap:10px; padding:4px 6px 22px; }
+  .drawer .brand .mark{ width:32px;height:32px;border-radius:9px;background:var(--gold); color:var(--navy); font-weight:800; font-size:13px; display:flex;align-items:center;justify-content:center; }
+  .drawer .brand .t1{ font-size:14px; font-weight:700; }
+  .drawer .brand .t2{ font-size:11px; color:#9FC1D6; }
+  .drawer-close{ margin-left:auto; background:none; border:none; color:#fff; font-size:20px; opacity:.8; }
+  .drawer .nav-item{ color:#CFE1EC; }
+  .drawer .nav-item:hover{ background:rgba(255,255,255,0.08); }
+  .drawer .nav-item.active{ background:rgba(255,255,255,0.16); color:#fff; }
+  .drawer-foot{ margin-top:auto; border-top:1px solid rgba(255,255,255,0.12); padding-top:14px; }
+
+  @media (max-width:820px){
+    .hamburger-btn{ display:flex; }
+  }
+
+  /* ---- Feedback forms + QR ---- */
+  .qr-box{ display:flex; flex-direction:column; align-items:center; gap:10px; padding:8px 0 4px; }
+  .qr-canvas-wrap{ background:#fff; padding:14px; border-radius:14px; border:1px solid var(--border); box-shadow:0 6px 18px rgba(0,20,40,0.1); }
+  .feedback-card{ position:relative; overflow:hidden; }
+  .feedback-card::before{
+    content:'\1F4DD'; position:absolute; right:-6px; top:-10px; font-size:64px; opacity:0.05;
+  }
+  .stars-row{ display:flex; gap:6px; font-size:22px; }
+  .star{ cursor:pointer; color:#D9DEE2; transition:color .1s, transform .1s; }
+  .star.active,.star:hover{ color:var(--gold); transform:scale(1.08); }
+
+  /* ---- Public feedback page ---- */
+  .public-wrap{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:radial-gradient(circle at 15% 20%, rgba(242,169,0,0.12) 0%, transparent 45%), linear-gradient(160deg,#00243A 0%,#003B5C 45%,#00507E 100%);
+  }
+  .public-card{
+    background:#fff; border-radius:18px; padding:34px 30px; width:480px; max-width:100%;
+    box-shadow:0 25px 70px rgba(0,15,30,0.45);
+  }
+  .public-brand{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .public-brand .mark{ width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--navy),var(--blue)); color:#fff; font-weight:800; display:flex;align-items:center;justify-content:center; }
+
+  /* ---- Profile hero polish ---- */
+  .profile-hero{
+    position:relative; overflow:hidden;
+    background:linear-gradient(120deg,var(--navy) 0%, var(--blue) 100%); color:#fff; border:none;
+  }
+  .profile-hero::before{
+    content:''; position:absolute; inset:0; opacity:0.14;
+    background-image:linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+    background-size:26px 26px;
+  }
+  .profile-hero .row-sub, .profile-hero .side-user-sub{ color:#CFE1EC; }
+  .profile-hero .avatar-sm{ background:rgba(255,255,255,0.18) !important; color:#fff !important; border:2px solid var(--gold); }
+
+  .assign-banner{
+    background:linear-gradient(120deg,var(--gold-light),#fff); border:1px solid var(--gold);
+    border-radius:var(--radius); padding:14px 16px; margin-bottom:16px;
+    display:flex; align-items:center; gap:12px; font-size:13px; font-weight:600; color:var(--navy);
+    animation:cardIn .4s ease;
+  }
+  .assign-banner .emoji{ font-size:22px; }
 </style>
 </head>
 <body>
@@ -409,6 +576,9 @@
   </div>
 </div>
 
+<!-- ============ PUBLIC FEEDBACK FORM (no login — opened via QR) ============ -->
+<div class="public-wrap" id="view-public" style="display:none;"></div>
+
 <!-- ============ SIGNUP (first time via Google) ============ -->
 <div class="signup-wrap" id="view-signup" style="display:none;">
   <div class="signup-card">
@@ -473,8 +643,25 @@
 
   <div class="main">
     <div class="topbar">
-      <h2 id="page-title">Home</h2>
-      <button class="btn btn-sm topbar-logout-mobile" onclick="logout()">Log out</button>
+      <div class="topbar-left">
+        <button class="hamburger-btn" onclick="openDrawer()" type="button" aria-label="Menu">\u2630</button>
+        <h2 id="page-title">Home</h2>
+      </div>
+      <div class="topbar-right">
+        <div class="bell-wrap">
+          <button class="bell-btn" onclick="toggleBell()" type="button" aria-label="Notifications">
+            \uD83D\uDD14<span class="bell-dot" id="bell-dot"></span>
+          </button>
+          <div class="bell-panel" id="bell-panel">
+            <div class="bell-panel-head">
+              <h4>Notifications</h4>
+              <button class="link-btn" onclick="markAllRead()">Mark all read</button>
+            </div>
+            <div class="bell-list" id="bell-list"></div>
+          </div>
+        </div>
+        <button class="btn btn-sm topbar-logout-mobile" onclick="logout()">Log out</button>
+      </div>
     </div>
     <div class="content" id="content"></div>
   </div>
@@ -482,6 +669,23 @@
   <nav class="bottom-nav">
     <div class="bottom-nav-inner" id="bottom-nav-items"></div>
   </nav>
+</div>
+
+<!-- ============ MOBILE HAMBURGER DRAWER ============ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="brand">
+    <div class="mark">TE</div>
+    <div><div class="t1">IEEE-TEC</div><div class="t2">Club Portal</div></div>
+    <button class="drawer-close" onclick="closeDrawer()" type="button" aria-label="Close menu">\u2715</button>
+  </div>
+  <div id="drawer-nav-items"></div>
+  <div class="drawer-foot">
+    <div id="drawer-role-badge"></div>
+    <div class="side-user" id="drawer-user-name" style="color:#fff;"></div>
+    <div class="side-user-sub" id="drawer-user-email"></div>
+    <button class="btn btn-sm btn-block" onclick="logout()">Log out</button>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modal-overlay">
@@ -531,7 +735,7 @@ googleProvider.setCustomParameters({ hd: "ternaengg.ac.in" });
    LOCAL CACHE — populated ENTIRELY from Firestore via loadAllData().
    There is no seed/mock data. Empty arrays until Firestore says otherwise.
 ===================================================================== */
-let DB = { users: [], teams: [], sessions: [], groups: [], teamRequests: [] };
+let DB = { users: [], teams: [], sessions: [], groups: [], teamRequests: [], feedbackForms: [], feedbackResponses: [] };
 let session = { currentUserId: null, _pendingSignup: null, _suppressAuthListener: false, _freshSignIn: false };
 let currentPage = 'home';
 
@@ -560,23 +764,34 @@ function sessionBadge(s){
   const isPast = new Date(s.date) < new Date();
   return isPast ? `<span class="badge badge-pending">Completed</span>` : `<span class="badge badge-live">Upcoming</span>`;
 }
+// Hide the landing screen immediately if this load is a public "scan the QR"
+// feedback link, so there's no flash of the login screen first.
+if(new URLSearchParams(location.search).get('fb')){
+  const landingEl = document.getElementById('view-landing');
+  if(landingEl) landingEl.style.display='none';
+}
 
 /* =====================================================================
    FIRESTORE DATA LAYER
 ===================================================================== */
 async function loadAllData(){
-  const [usersSnap, teamsSnap, sessionsSnap, groupsSnap, reqSnap] = await Promise.all([
+  const [usersSnap, teamsSnap, sessionsSnap, groupsSnap, reqSnap, fbFormsSnap, fbRespSnap] = await Promise.all([
     getDocs(collection(db,'users')),
     getDocs(collection(db,'teams')),
     getDocs(collection(db,'sessions')),
     getDocs(collection(db,'groups')),
     getDocs(collection(db,'teamRequests')),
+    getDocs(collection(db,'feedbackForms')),
+    getDocs(collection(db,'feedbackResponses')),
   ]);
-  DB.users = usersSnap.docs.map(d=>({ id:d.id, ...d.data() }));
+  DB.users = usersSnap.docs.map(d=>({ id:d.id, notifications:[], ...d.data() }));
   DB.teams = teamsSnap.docs.map(d=>({ id:d.id, memberIds:[], ...d.data() }));
   DB.sessions = sessionsSnap.docs.map(d=>({ id:d.id, registrations:[], questions:[], ...d.data() }));
   DB.groups = groupsSnap.docs.map(d=>({ id:d.id, memberIds:[], messages:[], ...d.data() }));
   DB.teamRequests = reqSnap.docs.map(d=>({ id:d.id, ...d.data() }));
+  DB.feedbackForms = fbFormsSnap.docs.map(d=>({ id:d.id, questions:[], ...d.data() }));
+  DB.feedbackResponses = fbRespSnap.docs.map(d=>({ id:d.id, ...d.data() }));
+  renderBell();
 }
 async function ensureLeadershipGroupHasMember(uid){
   const ref = doc(db,'groups','g-leadership');
@@ -588,6 +803,54 @@ async function ensureLeadershipGroupHasMember(uid){
   } else {
     await setDoc(ref, { name:'Leadership Group', memberIds:[uid], messages:[] });
   }
+}
+
+/* =====================================================================
+   NOTIFICATIONS — so assignments (e.g. Chairperson -> Team Head) are
+   immediately visible to the person they concern.
+===================================================================== */
+async function pushNotification(userId, text, emoji){
+  const target = userById(userId);
+  const notif = { id:'n'+Date.now()+Math.floor(Math.random()*1000), text, emoji: emoji||'\uD83D\uDD14', read:false, ts:Date.now() };
+  const existing = (target && target.notifications) || [];
+  await updateDoc(doc(db,'users',userId), { notifications:[...existing, notif] });
+}
+function renderBell(){
+  const u = currentUser();
+  if(!u) return;
+  const list = [...(u.notifications||[])].sort((a,b)=>b.ts-a.ts);
+  const unread = list.filter(n=>!n.read).length;
+  const dot = $('#bell-dot');
+  if(dot) dot.classList.toggle('show', unread>0);
+  const listEl = $('#bell-list');
+  if(listEl){
+    listEl.innerHTML = list.length ? list.map(n=>`
+      <div class="bell-item ${n.read?'':'unread'}">
+        <div class="bt">${n.emoji||'\uD83D\uDD14'} ${n.text}</div>
+        <div class="bs">${new Date(n.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`).join('') : `<div class="empty" style="padding:20px;">No notifications yet.</div>`;
+  }
+}
+function toggleBell(){
+  $('#bell-panel').classList.toggle('show');
+}
+async function markAllRead(){
+  const u = currentUser();
+  const updated = (u.notifications||[]).map(n=>({ ...n, read:true }));
+  await updateDoc(doc(db,'users',u.id), { notifications:updated });
+  await loadAllData();
+}
+document.addEventListener('click', (e)=>{
+  const wrap = document.querySelector('.bell-wrap');
+  if(wrap && !wrap.contains(e.target)) $('#bell-panel')?.classList.remove('show');
+});
+function openDrawer(){
+  $('#drawer').classList.add('show');
+  $('#drawer-overlay').classList.add('show');
+}
+function closeDrawer(){
+  $('#drawer').classList.remove('show');
+  $('#drawer-overlay').classList.remove('show');
 }
 
 /* =====================================================================
@@ -787,11 +1050,12 @@ async function completeSignup(){
    APP SHELL / NAV
 ===================================================================== */
 const NAV_CONFIG = [
-  { id:'home', label:'Home', icon:'\u2302' },
-  { id:'teams', label:'Teams', icon:'\u25A4' },
-  { id:'sessions', label:'Sessions', icon:'\u25F7' },
-  { id:'groups', label:'Groups', icon:'\u25C9' },
-  { id:'profile', label:'Profile', icon:'\u25CB' },
+  { id:'home', label:'Home', icon:'\uD83C\uDFE0' },
+  { id:'teams', label:'Teams', icon:'\uD83D\uDC65' },
+  { id:'sessions', label:'Sessions', icon:'\uD83C\uDFA4' },
+  { id:'groups', label:'Groups', icon:'\uD83D\uDCAC' },
+  { id:'feedback', label:'Feedback', icon:'\uD83D\uDCDD' },
+  { id:'profile', label:'Profile', icon:'\uD83D\uDC64' },
 ];
 function roleLabel(role){
   return { chairperson:'Chairperson', vice_chair:'Vice Chairperson', team_head:'Team Head', student:'Student' }[role] || role;
@@ -821,7 +1085,8 @@ function renderShell(){
       <span class="ic">${n.icon}</span><span class="label">${n.label}</span>
     </a>`).join('');
   $('#nav-items').innerHTML = navHtml;
-  const bottomHtml = NAV_CONFIG.map(n=>`
+  $('#drawer-nav-items').innerHTML = navHtml;
+  const bottomHtml = NAV_CONFIG.filter(n=>n.id!=='feedback').map(n=>`
     <a href="#" class="bottom-nav-item" data-nav="${n.id}" onclick="navigate('${n.id}');return false;">
       <span class="ic">${n.icon}</span><span>${n.label}</span>
     </a>`).join('');
@@ -829,6 +1094,10 @@ function renderShell(){
   $('#side-role-badge').innerHTML = `<span class="role-badge">${roleLabel(u.role)}</span>`;
   $('#side-user-name').textContent = u.name;
   $('#side-user-email').textContent = u.email;
+  $('#drawer-role-badge').innerHTML = `<span class="role-badge">${roleLabel(u.role)}</span>`;
+  $('#drawer-user-name').textContent = u.name;
+  $('#drawer-user-email').textContent = u.email;
+  renderBell();
 }
 function setActiveNav(id){
   $all('.nav-item, .bottom-nav-item').forEach(n=>n.classList.toggle('active', n.dataset.nav===id));
@@ -836,7 +1105,9 @@ function setActiveNav(id){
 function navigate(page){
   currentPage = page;
   setActiveNav(page);
-  const titles = { home:'Home', teams:'Teams', sessions:'Sessions', groups:'Groups', profile:'My profile' };
+  closeDrawer();
+  $('#bell-panel')?.classList.remove('show');
+  const titles = { home:'Home', teams:'Teams', sessions:'Sessions', groups:'Groups', feedback:'Feedback', profile:'My profile' };
   $('#page-title').textContent = titles[page] || page;
   const u = currentUser();
   const content = $('#content');
@@ -844,6 +1115,7 @@ function navigate(page){
   else if(page==='teams') content.innerHTML = renderTeams(u);
   else if(page==='sessions') content.innerHTML = renderSessions(u);
   else if(page==='groups') content.innerHTML = renderGroupsList(u);
+  else if(page==='feedback') content.innerHTML = renderFeedback(u);
   else if(page==='profile') content.innerHTML = renderProfile(u);
 }
 
@@ -885,7 +1157,14 @@ function renderHome(u){
       </div>`;
   }
 
+  let headBanner = '';
+  if(u.role==='team_head' && u.teamId){
+    const t = teamById(u.teamId);
+    if(t) headBanner = `<div class="assign-banner"><span class="emoji">\uD83C\uDF89</span><span>You're the <strong>Head</strong> of <strong>${t.name}</strong> \u2014 ${t.memberIds.length}/${t.maxSize} members on board.</span></div>`;
+  }
+
   return `
+    ${headBanner}
     <div class="grid grid-4">
       <div class="card card-stat"><div class="stat">${teamCount}</div><div class="stat-label">Active teams</div></div>
       <div class="card card-stat accent-navy"><div class="stat">${memberCount}</div><div class="stat-label">Team members</div></div>
@@ -1124,9 +1403,11 @@ async function confirmPosition(personId, teamId){
     } else {
       await setDoc(groupRef, { name:t.name, memberIds:[personId], messages:[] });
     }
+    await pushNotification(personId, `You've been assigned as Head of ${t.name}!`, '\uD83C\uDF89');
     toast(p.name+' confirmed as Head of '+t.name);
   } else {
     await ensureLeadershipGroupHasMember(personId);
+    await pushNotification(personId, `You've been confirmed as ${roleLabel(p.role)}.`, '\u2705');
     toast(p.name+' confirmed as '+roleLabel(p.role));
   }
   closeModal();
@@ -1135,6 +1416,7 @@ async function confirmPosition(personId, teamId){
 }
 async function rejectPosition(personId){
   await updateDoc(doc(db,'users',personId), { role:'student', status:'confirmed' });
+  await pushNotification(personId, `Your position request was not approved \u2014 you're set as Student for now.`, '\u2139\uFE0F');
   closeModal();
   await loadAllData();
   toast('Request rejected \u2014 moved to Student role');
@@ -1343,19 +1625,234 @@ async function sendMsg(groupId){
 }
 
 /* =====================================================================
+   FEEDBACK FORMS + QR CODES
+   Chairperson (and Vice Chair for viewing) can create a feedback form;
+   the app generates a scannable QR that opens the public, no-login
+   submission page at ?fb=<formId>.
+===================================================================== */
+function feedbackLink(formId){
+  return location.origin + location.pathname + '?fb=' + formId;
+}
+function renderFeedback(u){
+  const canManage = u.role==='chairperson';
+  const canViewAdmin = u.role==='chairperson' || u.role==='vice_chair';
+  const createBtn = canManage ? `<button class="btn btn-gold" onclick="openCreateFeedbackModal()">+ New feedback form</button>` : '';
+  const cards = DB.feedbackForms.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(f=>{
+    const s = f.sessionId ? DB.sessions.find(x=>x.id===f.sessionId) : null;
+    const count = DB.feedbackResponses.filter(r=>r.formId===f.id).length;
+    return `
+      <div class="card feedback-card" style="margin-bottom:16px;">
+        <h3 style="margin-bottom:2px;">${f.title}</h3>
+        <div class="row-sub">${s ? 'Linked to: '+s.title+' \u00b7 ' : ''}${(f.questions||[]).length} question${(f.questions||[]).length===1?'':'s'} \u00b7 ${count} response${count===1?'':'s'}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm btn-primary" onclick="openPublicFillModal('${f.id}')">\u270D\uFE0F Fill this form</button>
+          ${canViewAdmin ? `<button class="btn btn-sm" onclick="openQrModal('${f.id}')">\uD83D\uDCF2 QR code</button>` : ''}
+          ${canViewAdmin ? `<button class="btn btn-sm" onclick="openFeedbackResponsesModal('${f.id}')">View responses (${count})</button>` : ''}
+          ${canManage ? `<button class="btn btn-sm btn-danger-outline" onclick="deleteFeedbackForm('${f.id}')">Delete</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  return `<div class="page-header">${createBtn}</div>${cards || `<div class="empty">No feedback forms yet.${canManage?' Create one to get started \u2014 you\u2019ll get a shareable QR code instantly.':''}</div>`}`;
+}
+function openCreateFeedbackModal(){
+  const sessionOptions = DB.sessions.map(s=>`<option value="${s.id}">${s.title}</option>`).join('');
+  openModal(`
+    <h3>\uD83D\uDCDD Create feedback form</h3>
+    <div class="form-group"><label>Form title</label><input class="field-input" id="fb-title" placeholder="e.g. Workshop Feedback"/></div>
+    <div class="form-group">
+      <label>Link to a session (optional)</label>
+      <select class="field-input" id="fb-session"><option value="">Not linked</option>${sessionOptions}</select>
+    </div>
+    <div class="form-group">
+      <label>Questions</label>
+      <div class="questions-list" id="fb-questions">
+        <div class="q-item">
+          <input class="field-input" placeholder="Question" style="margin-bottom:0;"/>
+          <select class="field-input" style="max-width:112px;margin-bottom:0;flex:0 0 auto;"><option value="text">Text</option><option value="rating">Rating</option></select>
+          <button onclick="this.parentElement.remove()">\u00d7</button>
+        </div>
+      </div>
+      <button class="link-btn" onclick="addFeedbackQuestionField()">+ Add question</button>
+    </div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="createFeedbackForm()">Create form</button>
+    </div>
+  `);
+}
+function addFeedbackQuestionField(){
+  const wrap = $('#fb-questions');
+  const div = document.createElement('div');
+  div.className='q-item';
+  div.innerHTML = `<input class="field-input" placeholder="Question" style="margin-bottom:0;"/><select class="field-input" style="max-width:112px;margin-bottom:0;flex:0 0 auto;"><option value="text">Text</option><option value="rating">Rating</option></select><button onclick="this.parentElement.remove()">\u00d7</button>`;
+  wrap.appendChild(div);
+}
+async function createFeedbackForm(){
+  const title = $('#fb-title').value.trim();
+  const sessionId = $('#fb-session').value || null;
+  const rows = Array.from($all('#fb-questions .q-item'));
+  const questions = rows.map(r=>{
+    const inputs = r.querySelectorAll('input, select');
+    return { text: inputs[0].value.trim(), type: inputs[1].value };
+  }).filter(q=>q.text);
+  if(!title){ toast('Enter a form title'); return; }
+  if(!questions.length){ toast('Add at least one question'); return; }
+  const id = 'fb'+Date.now();
+  await setDoc(doc(db,'feedbackForms',id), { title, sessionId, questions, createdBy: currentUser().id, createdAt: Date.now() });
+  closeModal();
+  await loadAllData();
+  toast('Feedback form created \u2014 here\u2019s your QR code');
+  navigate('feedback');
+  openQrModal(id);
+}
+async function deleteFeedbackForm(formId){
+  await deleteDoc(doc(db,'feedbackForms',formId));
+  await loadAllData();
+  toast('Feedback form deleted');
+  navigate('feedback');
+}
+function openQrModal(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const link = feedbackLink(formId);
+  openModal(`
+    <h3>\uD83D\uDCF2 QR \u2014 ${f.title}</h3>
+    <div class="qr-box">
+      <div class="qr-canvas-wrap" id="qr-canvas-wrap"></div>
+      <div class="link-box" style="width:100%;"><span>\uD83D\uDD17</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>
+      <div style="font-size:12px;color:var(--text-muted);text-align:center;">Scan this at the event \u2014 it opens the feedback form directly, no login needed.</div>
+    </div>
+    <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
+  `);
+  const target = $('#qr-canvas-wrap');
+  if(target){
+    target.innerHTML='';
+    if(window.QRCode){
+      new QRCode(target, { text: link, width:180, height:180, colorDark:'#003B5C', colorLight:'#ffffff' });
+    } else {
+      target.innerHTML = `<div class="empty">QR library failed to load \u2014 use the link above instead.</div>`;
+    }
+  }
+}
+function openFeedbackResponsesModal(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const responses = DB.feedbackResponses.filter(r=>r.formId===formId).sort((a,b)=>(b.submittedAt||0)-(a.submittedAt||0));
+  const rows = responses.map(r=>`
+    <tr>
+      <td>${(r.answers||[]).map((a,i)=> (f.questions[i] && f.questions[i].type==='rating') ? '\u2B50'.repeat(Number(a)||0)||'\u2014' : (a||'\u2014')).join('<br/>')}</td>
+      <td>${r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '\u2014'}</td>
+    </tr>`).join('');
+  openModal(`
+    <h3>Responses \u2014 ${f.title}</h3>
+    <div style="overflow-x:auto;">
+    <table>
+      <tr><th>Answers</th><th>Submitted</th></tr>
+      ${rows || '<tr><td colspan="2" style="color:var(--text-muted);">No responses yet.</td></tr>'}
+    </table>
+    </div>
+    <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
+  `);
+}
+
+/* ---- shared question-field renderers (in-app fill + public page) ---- */
+function questionFieldHtml(q, i, prefix){
+  if(q.type==='rating'){
+    return `<div class="form-group"><label>${q.text}</label>
+      <div class="stars-row" data-qi="${i}">
+        ${[1,2,3,4,5].map(n=>`<span class="star" data-val="${n}" onclick="setStar(this,${i},'${prefix}')">\u2605</span>`).join('')}
+      </div>
+      <input type="hidden" id="${prefix}-q-${i}" value="0"/>
+    </div>`;
+  }
+  return `<div class="form-group"><label>${q.text}</label><input class="field-input" id="${prefix}-q-${i}"/></div>`;
+}
+function setStar(el, qi, prefix){
+  const val = Number(el.dataset.val);
+  const row = el.parentElement;
+  row.querySelectorAll('.star').forEach(s=>s.classList.toggle('active', Number(s.dataset.val)<=val));
+  $('#'+prefix+'-q-'+qi).value = val;
+}
+function openPublicFillModal(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  openModal(`
+    <h3>${f.title}</h3>
+    <div id="fill-fields">${(f.questions||[]).map((q,i)=>questionFieldHtml(q,i,'fill')).join('')}</div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitFeedbackInApp('${formId}')">Submit feedback</button>
+    </div>
+  `);
+}
+async function submitFeedbackInApp(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const answers = (f.questions||[]).map((q,i)=>{ const el=$('#fill-q-'+i); return el ? el.value.trim() : ''; });
+  const u = currentUser();
+  const id = 'resp'+Date.now();
+  await setDoc(doc(db,'feedbackResponses',id), { formId, answers, submittedBy:u.id, submittedAt:Date.now() });
+  closeModal();
+  await loadAllData();
+  toast('Thanks for your feedback! \uD83C\uDF89');
+  navigate('feedback');
+}
+
+/* ---- public route: opened via QR scan, no Firebase Auth required ---- */
+async function initPublicFeedbackRoute(){
+  const fid = new URLSearchParams(location.search).get('fb');
+  if(!fid) return;
+  const wrap = $('#view-public');
+  wrap.style.display='flex';
+  wrap.innerHTML = `<div class="public-card"><div class="empty">Loading form\u2026</div></div>`;
+  try{
+    const snap = await getDoc(doc(db,'feedbackForms',fid));
+    if(!snap.exists()){
+      wrap.innerHTML = `<div class="public-card"><div class="public-brand"><div class="mark">TE</div><div><strong>IEEE-TEC Portal</strong></div></div><div class="empty">This feedback form is no longer available.</div></div>`;
+      return;
+    }
+    const form = { id: snap.id, ...snap.data() };
+    wrap.innerHTML = `
+      <div class="public-card">
+        <div class="public-brand"><div class="mark">TE</div><div><div style="font-weight:800;">IEEE-TEC Portal</div><div style="font-size:12px;color:var(--text-muted);">Feedback form</div></div></div>
+        <h1 style="font-size:19px;font-weight:700;margin-bottom:4px;">${form.title}</h1>
+        <p class="sub" style="margin-bottom:20px;">Your response helps us improve future sessions.</p>
+        <div id="pub-fields">${(form.questions||[]).map((q,i)=>questionFieldHtml(q,i,'pub')).join('')}</div>
+        <button class="btn btn-primary btn-block" onclick="submitPublicFeedback('${form.id}')">Submit feedback</button>
+      </div>`;
+  }catch(e){
+    console.error(e);
+    wrap.innerHTML = `<div class="public-card"><div class="empty">Couldn\u2019t load this form. Please try scanning again.</div></div>`;
+  }
+}
+async function submitPublicFeedback(formId){
+  const snap = await getDoc(doc(db,'feedbackForms',formId));
+  const form = { id: snap.id, ...snap.data() };
+  const answers = (form.questions||[]).map((q,i)=>{ const el=document.getElementById('pub-q-'+i); return el ? el.value.trim() : ''; });
+  try{
+    const id = 'resp'+Date.now();
+    await setDoc(doc(db,'feedbackResponses',id), { formId, answers, submittedAt: Date.now() });
+    $('#view-public').innerHTML = `<div class="public-card" style="text-align:center;">
+      <div style="font-size:44px;margin-bottom:10px;">\u2705</div>
+      <h1 style="font-size:19px;font-weight:700;margin-bottom:6px;">Thank you!</h1>
+      <p class="sub">Your feedback has been recorded.</p>
+    </div>`;
+  }catch(e){
+    console.error(e);
+    toast('Could not submit \u2014 please try again.');
+  }
+}
+
+/* =====================================================================
    PROFILE
 ===================================================================== */
 function renderProfile(u){
   const team = u.teamId ? teamById(u.teamId) : null;
   const registered = DB.sessions.filter(s=>(s.registrations||[]).some(r=>r.studentId===u.id));
   return `
-    <div class="card" style="margin-bottom:16px;">
+    <div class="card profile-hero" style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;gap:14px;">
-        <div class="avatar-sm" style="width:52px;height:52px;font-size:18px;background:${avatarColor(u.id)}20;color:${avatarColor(u.id)};">${initials(u.name)}</div>
+        <div class="avatar-sm" style="width:56px;height:56px;font-size:19px;">${initials(u.name)}</div>
         <div>
-          <div style="font-size:16px;font-weight:700;">${u.name}</div>
+          <div style="font-size:17px;font-weight:700;">${u.name}</div>
           <div class="row-sub">${u.email} \u00b7 ${u.tuId}</div>
-          <span class="role-badge" style="background:var(--blue-light);color:var(--blue);margin-top:6px;">${roleLabel(u.role)}${u.status==='pending' ? ' \u00b7 pending' : ''}</span>
+          <span class="role-badge" style="margin-top:6px;">${roleLabel(u.role)}${u.status==='pending' ? ' \u00b7 pending' : ''}</span>
         </div>
       </div>
     </div>
@@ -1408,7 +1905,11 @@ Object.assign(window, {
   openCreateSessionModal, addQuestionField, createSession,
   copyLink, deleteSession, registerSession, submitRegistration, viewRegistrations,
   openGroup, sendMsg,
-  closeModal
+  closeModal,
+  openDrawer, closeDrawer, toggleBell, markAllRead,
+  openCreateFeedbackModal, addFeedbackQuestionField, createFeedbackForm, deleteFeedbackForm,
+  openQrModal, openFeedbackResponsesModal, openPublicFillModal, submitFeedbackInApp,
+  setStar, submitPublicFeedback
 });
 
 /* Restore session on page reload / re-visit, using real Firebase Auth state.
@@ -1423,6 +1924,9 @@ onAuthStateChanged(auth, (fbUser) => {
     handleAuthUser(fbUser);
   }
 });
+
+/* Public "scan the QR" feedback route — works without any login. */
+initPublicFeedbackRoute();
 </script>
 </body>
 </html>
