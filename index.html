@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>IEEE-TEC Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  :root{
+    --navy:#003B5C;
+    --blue:#00629B;
+    --blue-light:#E8F1F7;
+    --gold:#F2A900;
+    --gold-light:#FFF3DA;
+    --bg:#F5F7F8;
+    --card:#FFFFFF;
+    --border:#DFE5E8;
+    --text:#1B2B33;
+    --text-muted:#5A6B75;
+    --success:#2E7D32;
+    --success-bg:#E8F5E9;
+    --danger:#C62828;
+    --danger-bg:#FDECEA;
+    --radius:12px;
+    --radius-sm:8px;
+    --gap:16px;
+    --glow: 0 0 0 rgba(0,98,155,0);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    line-height:1.5;
+    -webkit-tap-highlight-color:transparent;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit; cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+
+  /* ---------- Landing ---------- */
+  .landing{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(180deg,#003B5C 0%,#00507E 100%);
+    padding:24px;
+  }
+  .landing-card{
+    background:var(--card);
+    border-radius:16px;
+    padding:44px 40px;
+    width:400px;
+    max-width:100%;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,20,40,0.35);
+  }
+  .brand-mark{
+    width:56px;height:56px;border-radius:14px;
+    background:var(--navy);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:20px;
+    margin:0 auto 20px;
+  }
+  .landing-card h1{font-size:22px;font-weight:700;margin-bottom:6px;}
+  .landing-card p.sub{color:var(--text-muted);font-size:14px;margin-bottom:28px;}
+  .google-btn{
+    width:100%;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    padding:13px 16px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    background:#fff;
+    font-size:15px;font-weight:600;
+    color:#3c4043;
+    transition:box-shadow .15s, border-color .15s;
+  }
+  .google-btn:hover{box-shadow:0 1px 6px rgba(0,0,0,0.12); border-color:#c6c6c6;}
+  .landing-note{font-size:12px;color:var(--text-muted);margin-top:20px;}
+
+  .auth-tabs{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:20px;overflow:hidden;}
+  .auth-tab{flex:1;padding:10px 0;font-size:13px;font-weight:700;background:#fff;color:var(--text-muted);border:none;}
+  .auth-tab.active{background:var(--navy);color:#fff;}
+  .divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text-muted);font-size:12px;}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+  .auth-panel-form{text-align:left;}
+
+  /* ---------- Signup form ---------- */
+  .signup-wrap{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:var(--bg);
+    padding:24px;
+  }
+  .signup-card{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:36px;width:460px;max-width:100%;
+  }
+  .signup-card h1{font-size:20px;font-weight:700;margin-bottom:4px;}
+  .signup-card p.sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+  .role-options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+  .role-opt{
+    display:flex;align-items:center;gap:12px;
+    border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 14px;
+    cursor:pointer;
+  }
+  .role-opt.active{border-color:var(--blue);background:var(--blue-light);}
+  .role-opt input{margin:0;flex-shrink:0;}
+  .role-opt .rt{font-size:14px;font-weight:600;}
+  .role-opt .rd{font-size:12px;color:var(--text-muted);}
+  .hint{font-size:12px;color:var(--text-muted);margin-top:-10px;margin-bottom:14px;}
+
+  .field-label{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;display:block;text-align:left;}
+  .field-input{
+    width:100%;padding:11px 12px;border:1px solid var(--border);
+    border-radius:var(--radius-sm);font-size:15px;margin-bottom:14px;
+  }
+  .field-input:focus{outline:none;border-color:var(--blue);}
+  .field-error{color:var(--danger);font-size:12px;margin-top:-10px;margin-bottom:12px;display:none;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);
+    font-size:14px;font-weight:600;background:#fff;color:var(--text);
+    min-height:42px;
+    transition:transform .1s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn:hover{background:#f5f6f7;}
+  .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .btn-primary:hover{background:#004f80;}
+  .btn-gold{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+  .btn-gold:hover{background:#d99600;}
+  .btn-block{width:100%;}
+  .btn-sm{padding:7px 13px;font-size:13px;min-height:34px;}
+  .btn-danger-outline{color:var(--danger);border-color:#f0c2c2;background:#fff;}
+  .btn-danger-outline:hover{background:var(--danger-bg);}
+  .btn-success{background:var(--success);color:#fff;border-color:var(--success);}
+  .link-btn{background:none;border:none;color:var(--blue);font-size:13px;font-weight:600;padding:0;min-height:auto;}
+
+  /* ---------- App shell ---------- */
+  .app-shell{display:none; min-height:100vh;}
+  .app-shell.show{display:flex;}
+  .sidebar{
+    width:224px;flex-shrink:0;
+    background:var(--navy);color:#fff;
+    display:flex;flex-direction:column;
+    padding:22px 14px;
+  }
+  .sidebar .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 24px;}
+  .sidebar .brand .mark{
+    width:32px;height:32px;border-radius:9px;background:var(--gold);
+    color:var(--navy);font-weight:800;font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .sidebar .brand .t1{font-size:14px;font-weight:700;}
+  .sidebar .brand .t2{font-size:11px;color:#9FC1D6;}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;
+    padding:11px 12px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;
+    color:#CFE1EC; margin-bottom:2px;
+  }
+  .nav-item .ic{width:18px;text-align:center;font-size:15px;flex-shrink:0;}
+  .nav-item:hover{background:rgba(255,255,255,0.06);}
+  .nav-item.active{background:rgba(255,255,255,0.14); color:#fff;}
+  .sidebar-foot{margin-top:auto;border-top:1px solid rgba(255,255,255,0.12);padding-top:16px;}
+  .role-badge{
+    display:inline-block;font-size:11px;font-weight:700;
+    padding:3px 9px;border-radius:20px;background:var(--gold);color:var(--navy);
+    margin-bottom:9px;
+  }
+  .side-user{font-size:13px;font-weight:600;margin-bottom:2px;}
+  .side-user-sub{font-size:11px;color:#9FC1D6;margin-bottom:12px;word-break:break-all;}
+
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .topbar{
+    height:64px;flex-shrink:0;
+    background:#fff;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 28px;
+  }
+  .topbar h2{font-size:18px;font-weight:700;}
+  .topbar-logout-mobile{display:none;}
+  .content{flex:1;padding:28px;overflow-y:auto;}
+
+  .grid{display:grid;gap:var(--gap);}
+  .grid-2{grid-template-columns:repeat(2,1fr);}
+  .grid-3{grid-template-columns:repeat(3,1fr);}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 20px;
+    transition:box-shadow .18s ease, transform .18s ease;
+  }
+  .card:hover{ box-shadow:0 10px 26px rgba(0,25,45,0.08); }
+  .card h3{font-size:14px;font-weight:700;margin-bottom:14px;}
+  .card-stat{border-left:3px solid var(--blue); padding:16px 18px;}
+  .card-stat.accent-navy{border-left-color:var(--navy);}
+  .card-stat.accent-success{border-left-color:var(--success);}
+  .card-stat.accent-gold{border-left-color:var(--gold);}
+  .stat{font-size:26px;font-weight:800;color:var(--navy);}
+  .stat-label{font-size:12px;color:var(--text-muted);margin-top:3px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{
+    text-align:left;font-size:11px;color:var(--text-muted);
+    font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);
+  }
+  td{padding:10px 10px;border-bottom:1px solid #EEF1F3;}
+  tr:last-child td{border-bottom:none;}
+
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;}
+  .badge-pending{background:#FFF3E0;color:#B26A00;}
+  .badge-confirmed{background:var(--success-bg);color:var(--success);}
+  .badge-live{background:var(--blue-light);color:var(--blue);}
+
+  .empty{
+    text-align:center;padding:32px 20px;color:var(--text-muted);font-size:13px;
+  }
+
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(20,25,30,0.5);
+    display:none;align-items:center;justify-content:center;z-index:60;
+    padding:16px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:#fff;border-radius:16px;width:480px;max-width:100%;
+    max-height:86vh;overflow-y:auto;
+    padding:24px 24px;
+    box-shadow:0 30px 70px rgba(0,20,40,0.3);
+  }
+  .modal h3{font-size:16px;font-weight:700;margin-bottom:16px;}
+  .modal-close-row{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap;}
+
+  .list-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;
+  }
+  .avatar-sm{
+    width:34px;height:34px;border-radius:50%;background:var(--blue-light);color:var(--blue);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+    flex-shrink:0;
+  }
+  .row-left{display:flex;align-items:center;gap:12px;min-width:0;}
+  .row-name{font-size:13px;font-weight:600;}
+  .row-sub{font-size:12px;color:var(--text-muted);}
+
+  .link-box{
+    display:flex;align-items:center;gap:8px;
+    background:var(--blue-light);border:1px solid #CFE1EC;border-radius:var(--radius-sm);
+    padding:9px 10px;font-size:12px;color:var(--navy);margin-top:10px;
+  }
+  .link-box input{
+    flex:1;border:none;background:transparent;font-size:12px;color:var(--navy);min-width:0;
+  }
+  .link-box input:focus{outline:none;}
+
+  .chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 220px);}
+  .chat-messages{flex:1;overflow-y:auto;padding:10px 4px;}
+  .msg{margin-bottom:12px;max-width:78%;}
+  .msg.me{margin-left:auto;text-align:right;}
+  .msg .bubble{
+    display:inline-block;padding:9px 13px;border-radius:14px;font-size:13px;
+    background:#fff;border:1px solid var(--border);text-align:left;
+  }
+  .msg.me .bubble{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .msg .meta{font-size:11px;color:var(--text-muted);margin-bottom:3px;}
+  .chat-input-row{display:flex;gap:8px;margin-top:10px;}
+  .chat-input-row input{
+    flex:1;padding:11px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;
+  }
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--navy);color:#fff;padding:10px 18px;border-radius:var(--radius-sm);
+    font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.2);
+    z-index:80; display:none; max-width:calc(100vw - 32px); text-align:center;
+  }
+
+  .form-group{margin-bottom:14px;}
+  .form-group label{font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;}
+  .form-row{display:flex;gap:10px;}
+  .form-row .form-group{flex:1;}
+
+  .questions-list{margin-bottom:10px;}
+  .q-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .q-item input{flex:1;}
+  .q-item button{color:var(--danger);background:none;border:none;font-size:18px;line-height:1;padding:0 4px;}
+
+  .page-header{display:flex;justify-content:flex-end;margin-bottom:16px;gap:10px;flex-wrap:wrap;}
+
+  /* ---------- Bottom nav (mobile) ---------- */
+  .bottom-nav{
+    display:none;
+    position:fixed;left:0;right:0;bottom:0;
+    background:#fff;border-top:1px solid var(--border);
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    z-index:45;
+  }
+  .bottom-nav-inner{display:flex;justify-content:space-around;}
+  .bottom-nav-item{
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:6px 8px;border-radius:10px;color:var(--text-muted);
+    font-size:10.5px;font-weight:600;min-width:56px;flex:1;
+    max-width:80px;
+  }
+  .bottom-nav-item .ic{font-size:19px;line-height:1;}
+  .bottom-nav-item.active{color:var(--blue);}
+
+  @media (max-width:820px){
+    .grid-2,.grid-3{grid-template-columns:1fr;}
+    .grid-4{grid-template-columns:repeat(2,1fr);}
+    .sidebar{display:none;}
+    .bottom-nav{display:block;}
+    .content{padding:16px 16px calc(90px + env(safe-area-inset-bottom));}
+    .topbar{padding:0 16px;height:56px;}
+    .topbar h2{font-size:16px;}
+    .topbar-logout-mobile{display:inline-flex;}
+    .page-header{margin-bottom:14px;}
+  }
+  @media (max-width:480px){
+    .landing-card{padding:36px 26px;}
+    .signup-card{padding:26px 20px;}
+    .modal{padding:20px 18px;}
+    .msg{max-width:88%;}
+  }
+
+  /* =====================================================================
+     IEEE-TEC visual refresh — circuitry theme, hamburger drawer,
+     notification bell, feedback / QR components
+  ===================================================================== */
+  .landing{
+    position:relative; overflow:hidden;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(242,169,0,0.14) 0%, transparent 45%),
+      radial-gradient(circle at 85% 75%, rgba(0,180,255,0.16) 0%, transparent 50%),
+      linear-gradient(160deg,#00243A 0%,#003B5C 45%,#00507E 100%);
+  }
+  .landing::before{
+    content:'';position:absolute;inset:0;opacity:0.16;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.35) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(circle at 50% 40%, black 0%, transparent 72%);
+  }
+  .landing::after{
+    content:'\26A1 IEEE \00B7 TERNA ENGINEERING COLLEGE \00B7 STUDENT BRANCH \26A1';
+    position:absolute; left:0; right:0; bottom:18px; text-align:center;
+    font-size:10.5px; letter-spacing:2px; color:rgba(255,255,255,0.28); font-weight:700;
+    pointer-events:none;
+  }
+  .landing-card{ position:relative; z-index:1; box-shadow:0 25px 70px rgba(0,15,30,0.5), var(--glow); animation:cardIn .5s ease; }
+  @keyframes cardIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  .brand-mark{
+    background:linear-gradient(135deg,var(--navy),var(--blue) 60%,#0090c9);
+    box-shadow:0 0 0 4px var(--gold-light), 0 10px 24px rgba(0,59,92,0.35);
+    position:relative;
+  }
+  .brand-mark::after{
+    content:'\26A1'; position:absolute; right:-6px; bottom:-6px; font-size:14px;
+    background:var(--gold); color:var(--navy); width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  /* ---- App shell header polish ---- */
+  .sidebar{
+    background:linear-gradient(190deg,var(--navy) 0%, #002944 100%);
+    position:relative;
+  }
+  .sidebar::before{
+    content:''; position:absolute; inset:0; opacity:0.06; pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+    background-size:28px 28px;
+  }
+  .sidebar .brand .mark{ box-shadow:0 0 12px rgba(242,169,0,0.55); }
+  .nav-item{ transition:background .15s, transform .1s, padding-left .15s; position:relative; z-index:1; }
+  .nav-item:hover{ padding-left:16px; }
+  .nav-item.active{ box-shadow:inset 3px 0 0 var(--gold); }
+  .nav-item .ic{ font-size:17px; }
+
+  .topbar{ gap:10px; }
+  .topbar-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .hamburger-btn{
+    display:none; align-items:center; justify-content:center;
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border);
+    background:#fff;font-size:18px;flex-shrink:0;
+  }
+  .hamburger-btn:active{ background:var(--blue-light); }
+  .topbar-right{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+
+  /* ---- Notification bell ---- */
+  .bell-wrap{ position:relative; }
+  .bell-btn{
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border);
+    background:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .bell-dot{
+    position:absolute; top:5px; right:6px; width:9px;height:9px;border-radius:50%;
+    background:var(--danger); border:2px solid #fff; display:none;
+  }
+  .bell-dot.show{ display:block; }
+  .bell-panel{
+    position:absolute; top:46px; right:0; width:320px; max-width:88vw;
+    background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:0 20px 50px rgba(0,20,40,0.22); z-index:70; display:none; overflow:hidden;
+  }
+  .bell-panel.show{ display:block; }
+  .bell-panel-head{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--border); }
+  .bell-panel-head h4{ font-size:13px; font-weight:700; }
+  .bell-list{ max-height:340px; overflow-y:auto; }
+  .bell-item{ padding:11px 14px; border-bottom:1px solid #EEF1F3; font-size:12.5px; }
+  .bell-item:last-child{ border-bottom:none; }
+  .bell-item.unread{ background:var(--blue-light); }
+  .bell-item .bt{ font-weight:600; margin-bottom:2px; }
+  .bell-item .bs{ color:var(--text-muted); font-size:11px; }
+
+  /* ---- Hamburger drawer (mobile full nav) ---- */
+  .drawer-overlay{
+    position:fixed; inset:0; background:rgba(10,20,30,0.5); z-index:90;
+    display:none;
+  }
+  .drawer-overlay.show{ display:block; }
+  .drawer{
+    position:fixed; top:0; left:0; bottom:0; width:262px; max-width:80vw;
+    background:linear-gradient(190deg,var(--navy) 0%, #002944 100%); color:#fff;
+    z-index:95; transform:translateX(-100%); transition:transform .22s ease;
+    display:flex; flex-direction:column; padding:20px 14px;
+  }
+  .drawer.show{ transform:translateX(0); }
+  .drawer .brand{ display:flex; align-items:center; gap:10px; padding:4px 6px 22px; }
+  .drawer .brand .mark{ width:32px;height:32px;border-radius:9px;background:var(--gold); color:var(--navy); font-weight:800; font-size:13px; display:flex;align-items:center;justify-content:center; }
+  .drawer .brand .t1{ font-size:14px; font-weight:700; }
+  .drawer .brand .t2{ font-size:11px; color:#9FC1D6; }
+  .drawer-close{ margin-left:auto; background:none; border:none; color:#fff; font-size:20px; opacity:.8; }
+  .drawer .nav-item{ color:#CFE1EC; }
+  .drawer .nav-item:hover{ background:rgba(255,255,255,0.08); }
+  .drawer .nav-item.active{ background:rgba(255,255,255,0.16); color:#fff; }
+  .drawer-foot{ margin-top:auto; border-top:1px solid rgba(255,255,255,0.12); padding-top:14px; }
+
+  @media (max-width:820px){
+    .hamburger-btn{ display:flex; }
+  }
+
+  /* ---- Feedback forms + QR ---- */
+  .qr-box{ display:flex; flex-direction:column; align-items:center; gap:10px; padding:8px 0 4px; }
+  .qr-canvas-wrap{ background:#fff; padding:14px; border-radius:14px; border:1px solid var(--border); box-shadow:0 6px 18px rgba(0,20,40,0.1); }
+  .feedback-card{ position:relative; overflow:hidden; }
+  .feedback-card::before{
+    content:'\1F4DD'; position:absolute; right:-6px; top:-10px; font-size:64px; opacity:0.05;
+  }
+  .stars-row{ display:flex; gap:6px; font-size:22px; }
+  .star{ cursor:pointer; color:#D9DEE2; transition:color .1s, transform .1s; }
+  .star.active,.star:hover{ color:var(--gold); transform:scale(1.08); }
+
+  /* ---- Public feedback page ---- */
+  .public-wrap{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:radial-gradient(circle at 15% 20%, rgba(242,169,0,0.12) 0%, transparent 45%), linear-gradient(160deg,#00243A 0%,#003B5C 45%,#00507E 100%);
+  }
+  .public-card{
+    background:#fff; border-radius:18px; padding:34px 30px; width:480px; max-width:100%;
+    box-shadow:0 25px 70px rgba(0,15,30,0.45);
+  }
+  .public-brand{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .public-brand .mark{ width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--navy),var(--blue)); color:#fff; font-weight:800; display:flex;align-items:center;justify-content:center; }
+
+  /* ---- Profile hero polish ---- */
+  .profile-hero{
+    position:relative; overflow:hidden;
+    background:linear-gradient(120deg,var(--navy) 0%, var(--blue) 100%); color:#fff; border:none;
+  }
+  .profile-hero::before{
+    content:''; position:absolute; inset:0; opacity:0.14;
+    background-image:linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+    background-size:26px 26px;
+  }
+  .profile-hero .row-sub, .profile-hero .side-user-sub{ color:#CFE1EC; }
+  .profile-hero .avatar-sm{ background:rgba(255,255,255,0.18) !important; color:#fff !important; border:2px solid var(--gold); }
+
+  .assign-banner{
+    background:linear-gradient(120deg,var(--gold-light),#fff); border:1px solid var(--gold);
+    border-radius:var(--radius); padding:14px 16px; margin-bottom:16px;
+    display:flex; align-items:center; gap:12px; font-size:13px; font-weight:600; color:var(--navy);
+    animation:cardIn .4s ease;
+  }
+  .assign-banner .emoji{ font-size:22px; }
+
+  /* ---- E-Certificates ---- */
+  .cert-scale-wrap{ width:100%; overflow-x:auto; display:flex; justify-content:center; padding:6px 0; }
+  .cert-card{
+    position:relative; width:900px; height:520px; flex-shrink:0;
+    background:
+      radial-gradient(circle at 8% 12%, rgba(0,98,155,0.05) 0%, transparent 35%),
+      radial-gradient(circle at 92% 88%, rgba(242,169,0,0.08) 0%, transparent 40%),
+      #fdfdfb;
+    border:10px solid var(--navy);
+    outline:2px solid var(--gold);
+    outline-offset:-16px;
+    padding:34px 54px;
+    text-align:center;
+    font-family:'Inter',sans-serif;
+    box-sizing:border-box;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+  }
+  .cert-corner{ position:absolute; width:40px; height:40px; border-color:var(--gold); }
+  .cert-tl{ top:14px; left:14px; border-top:4px solid var(--gold); border-left:4px solid var(--gold); }
+  .cert-tr{ top:14px; right:14px; border-top:4px solid var(--gold); border-right:4px solid var(--gold); }
+  .cert-bl{ bottom:14px; left:14px; border-bottom:4px solid var(--gold); border-left:4px solid var(--gold); }
+  .cert-br{ bottom:14px; right:14px; border-bottom:4px solid var(--gold); border-right:4px solid var(--gold); }
+  .cert-seal{ position:absolute; top:26px; right:60px; font-size:30px; opacity:.85; }
+  .cert-brand{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .cert-brand-mark{ width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--navy),var(--blue)); color:#fff; font-weight:800; display:flex;align-items:center;justify-content:center; font-size:14px; }
+  .cert-brand-t1{ font-size:12.5px; font-weight:800; letter-spacing:1.2px; color:var(--navy); }
+  .cert-brand-t2{ font-size:11px; color:var(--text-muted); }
+  .cert-title{ font-size:30px; font-weight:800; color:var(--navy); margin-top:14px; letter-spacing:0.5px; }
+  .cert-sub{ font-size:13px; color:var(--text-muted); margin-top:10px; max-width:620px; }
+  .cert-name{ font-size:34px; font-weight:800; color:var(--gold); margin:12px 0; font-family:Georgia,'Times New Roman',serif; border-bottom:2px solid var(--gold-light); padding-bottom:6px; min-width:320px; }
+  .cert-session{ font-size:18px; font-weight:700; color:var(--navy); margin-top:6px; }
+  .cert-foot{ margin-top:auto; padding-top:26px; display:flex; align-items:flex-end; justify-content:space-between; width:100%; gap:16px; }
+  .cert-sign{ flex:1; text-align:center; }
+  .cert-sign-line{ border-top:1.5px solid var(--text); width:150px; margin:0 auto 6px; }
+  .cert-sign-label{ font-size:11px; color:var(--text-muted); font-weight:600; }
+  .cert-code-block{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .cert-qr{ background:#fff; padding:4px; border-radius:6px; }
+  .cert-code{ font-size:9.5px; color:var(--text-muted); letter-spacing:0.5px; font-family:monospace; }
+  .cert-verify-note{ font-size:10.5px; color:var(--text-muted); margin-top:14px; }
+  @media (max-width:900px){
+    .cert-card{ width:640px; height:370px; padding:22px 30px; }
+    .cert-title{ font-size:22px; }
+    .cert-name{ font-size:24px; }
+    .cert-session{ font-size:14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<div class="landing" id="view-landing">
+  <div class="landing-card">
+    <div class="brand-mark">TE</div>
+    <h1>IEEE-TEC Portal</h1>
+    <p class="sub">Sign in with your college email to continue</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" type="button">Log in</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')" type="button">Sign up</button>
+    </div>
+
+    <!-- LOGIN PANEL (existing users) -->
+    <div id="panel-login">
+      <button class="google-btn" onclick="openPicker()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.17.29-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider"><span>or log in with email &amp; password</span></div>
+      <div class="auth-panel-form">
+        <label class="field-label">College email</label>
+        <input class="field-input" id="li-email" placeholder="you@ternaengg.ac.in" autocomplete="username"/>
+        <label class="field-label">Password</label>
+        <input class="field-input" id="li-password" type="password" autocomplete="current-password"/>
+      </div>
+      <div class="field-error" id="li-error"></div>
+      <button class="btn btn-primary btn-block" onclick="loginWithPassword()">Log in</button>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">New here? <button class="link-btn" type="button" onclick="switchAuthTab('signup')">Sign up instead</button></p>
+    </div>
+
+    <!-- SIGNUP PANEL (new users) -->
+    <div id="panel-signup" style="display:none;">
+      <button class="google-btn" onclick="openPicker()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.17.29-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider"><span>or create an account with email &amp; password</span></div>
+      <div class="auth-panel-form">
+        <label class="field-label">Full name</label>
+        <input class="field-input" id="ls-name"/>
+        <label class="field-label">College email</label>
+        <input class="field-input" id="ls-email" placeholder="you@ternaengg.ac.in" autocomplete="username"/>
+        <label class="field-label">College ID</label>
+        <input class="field-input" id="ls-id" placeholder="e.g. TU8F2324045"/>
+        <div class="hint">Format: TU + branch code (N) + division (A) + admission year (YYYY) + roll no (RRR)</div>
+        <label class="field-label">Password</label>
+        <input class="field-input" id="ls-password" type="password" autocomplete="new-password"/>
+        <label class="field-label">Confirm password</label>
+        <input class="field-input" id="ls-password2" type="password" autocomplete="new-password"/>
+
+        <label class="field-label" style="margin-bottom:8px;">I am signing up as</label>
+        <div class="role-options" id="ls-role-options">
+          <label class="role-opt active" data-role="student">
+            <input type="radio" name="ls-role" value="student" checked onchange="selectRole(this)"/>
+            <div><div class="rt">Student / Member</div><div class="rd">Join a team and attend sessions</div></div>
+          </label>
+          <label class="role-opt" data-role="team_head">
+            <input type="radio" name="ls-role" value="team_head" onchange="selectRole(this)"/>
+            <div><div class="rt">Team Head</div><div class="rd">Awaiting confirmation from the Chairperson</div></div>
+          </label>
+          <label class="role-opt" data-role="vice_chair">
+            <input type="radio" name="ls-role" value="vice_chair" onchange="selectRole(this)"/>
+            <div><div class="rt">Vice Chairperson</div><div class="rd">Awaiting confirmation from the Chairperson</div></div>
+          </label>
+          <label class="role-opt" data-role="chairperson">
+            <input type="radio" name="ls-role" value="chairperson" onchange="selectRole(this)"/>
+            <div><div class="rt">Chairperson</div><div class="rd">Full club administration access</div></div>
+          </label>
+          <label class="role-opt" data-role="participant">
+            <input type="radio" name="ls-role" value="participant" onchange="selectRole(this)"/>
+            <div><div class="rt">Session Participant</div><div class="rd">Just here to attend sessions & collect certificates</div></div>
+          </label>
+        </div>
+      </div>
+      <div class="field-error" id="ls-error"></div>
+      <button class="btn btn-primary btn-block" onclick="signupWithPassword()">Create account</button>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">Already have an account? <button class="link-btn" type="button" onclick="switchAuthTab('login')">Log in instead</button></p>
+    </div>
+
+    <p class="landing-note">Only @ternaengg.ac.in accounts can access this portal.</p>
+  </div>
+</div>
+
+<!-- ============ PUBLIC FEEDBACK FORM (no login — opened via QR) ============ -->
+<div class="public-wrap" id="view-public" style="display:none;"></div>
+
+<!-- ============ SIGNUP (first time via Google) ============ -->
+<div class="signup-wrap" id="view-signup" style="display:none;">
+  <div class="signup-card">
+    <h1>Complete your profile</h1>
+    <p class="sub">This looks like your first time signing in. A few details before we get you in.</p>
+
+    <div class="form-group">
+      <label>Full name</label>
+      <input class="field-input" id="su-name" />
+    </div>
+    <div class="form-group">
+      <label>College email</label>
+      <input class="field-input" id="su-email" disabled style="background:#F2F4F5;color:var(--text-muted);" />
+    </div>
+    <div class="form-group">
+      <label>College ID</label>
+      <input class="field-input" id="su-id" placeholder="e.g. TU8F2324045" />
+    </div>
+    <div class="hint">Format: TU + branch code (N) + division (A) + admission year (YYYY) + roll no (RRR)</div>
+
+    <label class="field-label" style="margin-bottom:8px;">I am signing up as</label>
+    <div class="role-options" id="role-options">
+      <label class="role-opt active" data-role="student">
+        <input type="radio" name="role" value="student" checked onchange="selectRole(this)"/>
+        <div><div class="rt">Student / Member</div><div class="rd">Join a team and attend sessions</div></div>
+      </label>
+      <label class="role-opt" data-role="team_head">
+        <input type="radio" name="role" value="team_head" onchange="selectRole(this)"/>
+        <div><div class="rt">Team Head</div><div class="rd">Awaiting confirmation from the Chairperson</div></div>
+      </label>
+      <label class="role-opt" data-role="vice_chair">
+        <input type="radio" name="role" value="vice_chair" onchange="selectRole(this)"/>
+        <div><div class="rt">Vice Chairperson</div><div class="rd">Awaiting confirmation from the Chairperson</div></div>
+      </label>
+      <label class="role-opt" data-role="chairperson">
+        <input type="radio" name="role" value="chairperson" onchange="selectRole(this)"/>
+        <div><div class="rt">Chairperson</div><div class="rd">Full club administration access</div></div>
+      </label>
+      <label class="role-opt" data-role="participant">
+        <input type="radio" name="role" value="participant" onchange="selectRole(this)"/>
+        <div><div class="rt">Session Participant</div><div class="rd">Just here to attend sessions & collect certificates</div></div>
+      </label>
+    </div>
+
+    <div class="field-error" id="su-error">Please fill your name and college ID before continuing.</div>
+    <button class="btn btn-primary btn-block" onclick="completeSignup()">Create account</button>
+    <button class="btn btn-block" style="margin-top:10px;" onclick="cancelGoogleSignup()" type="button">Cancel &amp; sign out</button>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div class="app-shell" id="app-shell">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="mark">TE</div>
+      <div><div class="t1">IEEE-TEC</div><div class="t2">Club Portal</div></div>
+    </div>
+    <div id="nav-items"></div>
+    <div class="sidebar-foot">
+      <div id="side-role-badge"></div>
+      <div class="side-user" id="side-user-name"></div>
+      <div class="side-user-sub" id="side-user-email"></div>
+      <button class="btn btn-sm btn-block" onclick="logout()">Log out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn" onclick="openDrawer()" type="button" aria-label="Menu">\u2630</button>
+        <h2 id="page-title">Home</h2>
+      </div>
+      <div class="topbar-right">
+        <div class="bell-wrap">
+          <button class="bell-btn" onclick="toggleBell()" type="button" aria-label="Notifications">
+            \uD83D\uDD14<span class="bell-dot" id="bell-dot"></span>
+          </button>
+          <div class="bell-panel" id="bell-panel">
+            <div class="bell-panel-head">
+              <h4>Notifications</h4>
+              <button class="link-btn" onclick="markAllRead()">Mark all read</button>
+            </div>
+            <div class="bell-list" id="bell-list"></div>
+          </div>
+        </div>
+        <button class="btn btn-sm topbar-logout-mobile" onclick="logout()">Log out</button>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner" id="bottom-nav-items"></div>
+  </nav>
+</div>
+
+<!-- ============ MOBILE HAMBURGER DRAWER ============ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="brand">
+    <div class="mark">TE</div>
+    <div><div class="t1">IEEE-TEC</div><div class="t2">Club Portal</div></div>
+    <button class="drawer-close" onclick="closeDrawer()" type="button" aria-label="Close menu">\u2715</button>
+  </div>
+  <div id="drawer-nav-items"></div>
+  <div class="drawer-foot">
+    <div id="drawer-role-badge"></div>
+    <div class="side-user" id="drawer-user-name" style="color:#fff;"></div>
+    <div class="side-user-sub" id="drawer-user-email"></div>
+    <button class="btn btn-sm btn-block" onclick="logout()">Log out</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* =====================================================================
+   FIREBASE SETUP (real Auth + Firestore — every collection below is the
+   single source of truth. Nothing on this page is hardcoded mock data;
+   if a collection is empty in Firestore, the UI simply shows an empty
+   state until real data exists.)
+===================================================================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDEEBkp0lTVmpmWBmIsqkgnHlDWhMA_mC8",
+  authDomain: "ieee-tec.firebaseapp.com",
+  projectId: "ieee-tec",
+  storageBucket: "ieee-tec.firebasestorage.app",
+  messagingSenderId: "1011921780389",
+  appId: "1:1011921780389:web:5c11c062eb54b2f77bd74c",
+  measurementId: "G-FBGSQ8H87Q"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const analytics = getAnalytics(fbApp);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+const googleProvider = new GoogleAuthProvider();
+// Best-effort UI hint only — the real domain check happens in handleAuthUser
+// (and must also be enforced by Firestore Security Rules; never trust the
+// frontend alone).
+googleProvider.setCustomParameters({ hd: "ternaengg.ac.in" });
+
+/* =====================================================================
+   LOCAL CACHE — populated ENTIRELY from Firestore via loadAllData().
+   There is no seed/mock data. Empty arrays until Firestore says otherwise.
+===================================================================== */
+let DB = { users: [], teams: [], sessions: [], groups: [], teamRequests: [], feedbackForms: [], feedbackResponses: [], certificates: [] };
+let session = { currentUserId: null, _pendingSignup: null, _suppressAuthListener: false, _freshSignIn: false };
+let currentPage = 'home';
+
+/* ---------------- helpers ---------------- */
+function $(sel){ return document.querySelector(sel); }
+function $all(sel){ return document.querySelectorAll(sel); }
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.style.display='block';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>{ t.style.display='none'; }, 2600);
+}
+function initials(name){ return (name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+function avatarColor(id){
+  const colors = ['#00629B','#2E7D32','#B26A00','#993C1D','#534AB7'];
+  let sum=0; for(const c of String(id)){ sum+=c.charCodeAt(0); }
+  return colors[sum % colors.length];
+}
+function currentUser(){ return DB.users.find(u=>u.id===session.currentUserId); }
+function userById(id){ return DB.users.find(u=>u.id===id); }
+function teamById(id){ return DB.teams.find(t=>t.id===id); }
+function formatDate(d){
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short'}) + ' \u00b7 ' + dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+function sessionBadge(s){
+  const isPast = new Date(s.date) < new Date();
+  return isPast ? `<span class="badge badge-pending">Completed</span>` : `<span class="badge badge-live">Upcoming</span>`;
+}
+// Hide the landing screen immediately if this load is a certificate
+// verification link, so there's no flash of the login screen first.
+// (A feedback-form link — ?fb= — is handled differently: feedback now
+// requires the person to be logged in, so for that one we deliberately
+// let the normal landing/login screen show.)
+const _urlParams = new URLSearchParams(location.search);
+if(_urlParams.get('verify')){
+  const landingEl = document.getElementById('view-landing');
+  if(landingEl) landingEl.style.display='none';
+}
+// A "scan the session QR" link needs the person to be logged in (so we know
+// who is enrolling / who already is), so we just remember it and act on it
+// once they land inside the app (see enterApp()).
+let pendingScanSessionId = _urlParams.get('session') || null;
+// Same idea for a feedback-form link (?fb=<id>): every response must now be
+// tied to a logged-in @ternaengg.ac.in account (so one person = one
+// response, and admins can see who answered what) — so we remember which
+// form they came for and open it automatically right after they log in.
+let pendingFeedbackFormId = _urlParams.get('fb') || null;
+
+/* =====================================================================
+   FIRESTORE DATA LAYER
+===================================================================== */
+async function loadAllData(){
+  const [usersSnap, teamsSnap, sessionsSnap, groupsSnap, reqSnap, fbFormsSnap, fbRespSnap, certsSnap] = await Promise.all([
+    getDocs(collection(db,'users')),
+    getDocs(collection(db,'teams')),
+    getDocs(collection(db,'sessions')),
+    getDocs(collection(db,'groups')),
+    getDocs(collection(db,'teamRequests')),
+    getDocs(collection(db,'feedbackForms')),
+    getDocs(collection(db,'feedbackResponses')),
+    getDocs(collection(db,'certificates')),
+  ]);
+  DB.users = usersSnap.docs.map(d=>({ id:d.id, notifications:[], canMarkAttendance:false, ...d.data() }));
+  DB.teams = teamsSnap.docs.map(d=>({ id:d.id, memberIds:[], ...d.data() }));
+  DB.sessions = sessionsSnap.docs.map(d=>({ id:d.id, registrations:[], questions:[], ...d.data() }));
+  DB.groups = groupsSnap.docs.map(d=>({ id:d.id, memberIds:[], messages:[], ...d.data() }));
+  DB.teamRequests = reqSnap.docs.map(d=>({ id:d.id, ...d.data() }));
+  DB.feedbackForms = fbFormsSnap.docs.map(d=>({ id:d.id, questions:[], ...d.data() }));
+  DB.feedbackResponses = fbRespSnap.docs.map(d=>({ id:d.id, ...d.data() }));
+  DB.certificates = certsSnap.docs.map(d=>({ id:d.id, name:'', ...d.data() }));
+  renderBell();
+}
+async function ensureLeadershipGroupHasMember(uid){
+  const ref = doc(db,'groups','g-leadership');
+  const snap = await getDoc(ref);
+  if(snap.exists()){
+    const data = snap.data();
+    const members = Array.from(new Set([...(data.memberIds||[]), uid]));
+    await updateDoc(ref, { memberIds:members });
+  } else {
+    await setDoc(ref, { name:'Leadership Group', memberIds:[uid], messages:[] });
+  }
+}
+
+/* =====================================================================
+   NOTIFICATIONS — so assignments (e.g. Chairperson -> Team Head) are
+   immediately visible to the person they concern.
+===================================================================== */
+async function pushNotification(userId, text, emoji){
+  const target = userById(userId);
+  const notif = { id:'n'+Date.now()+Math.floor(Math.random()*1000), text, emoji: emoji||'\uD83D\uDD14', read:false, ts:Date.now() };
+  const existing = (target && target.notifications) || [];
+  await updateDoc(doc(db,'users',userId), { notifications:[...existing, notif] });
+}
+function renderBell(){
+  const u = currentUser();
+  if(!u) return;
+  const list = [...(u.notifications||[])].sort((a,b)=>b.ts-a.ts);
+  const unread = list.filter(n=>!n.read).length;
+  const dot = $('#bell-dot');
+  if(dot) dot.classList.toggle('show', unread>0);
+  const listEl = $('#bell-list');
+  if(listEl){
+    listEl.innerHTML = list.length ? list.map(n=>`
+      <div class="bell-item ${n.read?'':'unread'}">
+        <div class="bt">${n.emoji||'\uD83D\uDD14'} ${n.text}</div>
+        <div class="bs">${new Date(n.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`).join('') : `<div class="empty" style="padding:20px;">No notifications yet.</div>`;
+  }
+}
+function toggleBell(){
+  $('#bell-panel').classList.toggle('show');
+}
+async function markAllRead(){
+  const u = currentUser();
+  const updated = (u.notifications||[]).map(n=>({ ...n, read:true }));
+  await updateDoc(doc(db,'users',u.id), { notifications:updated });
+  await loadAllData();
+}
+document.addEventListener('click', (e)=>{
+  const wrap = document.querySelector('.bell-wrap');
+  if(wrap && !wrap.contains(e.target)) $('#bell-panel')?.classList.remove('show');
+});
+function openDrawer(){
+  $('#drawer').classList.add('show');
+  $('#drawer-overlay').classList.add('show');
+}
+function closeDrawer(){
+  $('#drawer').classList.remove('show');
+  $('#drawer-overlay').classList.remove('show');
+}
+
+/* =====================================================================
+   LOGIN — real Firebase Authentication (Google sign-in)
+===================================================================== */
+async function openPicker(){
+  try{
+    session._freshSignIn = true;
+    await signInWithPopup(auth, googleProvider);
+    // Don't call handleAuthUser here — onAuthStateChanged below is the
+    // single source of truth and will fire right after this resolves.
+    // Calling it from both places caused the race that showed the
+    // wrong (password-less) screen intermittently.
+  }catch(e){
+    session._freshSignIn = false;
+    console.error(e);
+    toast('Sign-in failed: '+e.message);
+  }
+}
+
+// Called after ANY successful Firebase sign-in (fresh popup or restored session).
+async function handleAuthUser(fbUser){
+  if(!fbUser.email || !fbUser.email.toLowerCase().endsWith('@ternaengg.ac.in')){
+    await signOut(auth);
+    toast('Only @ternaengg.ac.in accounts can access this portal.');
+    session._freshSignIn = false;
+    return;
+  }
+  const userRef = doc(db, 'users', fbUser.uid);
+  const snap = await getDoc(userRef);
+  if(snap.exists()){
+    session.currentUserId = fbUser.uid;
+    session._freshSignIn = false;
+    await loadAllData();
+    enterApp();
+  } else if(session._freshSignIn){
+    // First-time sign-in from an explicit, fresh click — collect name +
+    // College ID before creating the account.
+    session._freshSignIn = false;
+    session._pendingSignup = { id: fbUser.uid, name: fbUser.displayName || '', email: fbUser.email };
+    $('#view-landing').style.display='none';
+    $('#view-signup').style.display='flex';
+    $('#su-name').value = session._pendingSignup.name;
+    $('#su-email').value = session._pendingSignup.email;
+  } else {
+    // A dangling/incomplete account got auto-restored on page load (e.g. a
+    // Google sign-in that was started but never finished earlier). Don't
+    // hijack the screen with the completion form — just sign it out quietly
+    // so the person lands on a clean landing page and can start over.
+    await signOut(auth);
+  }
+}
+
+/* =====================================================================
+   LANDING AUTH TABS (Log in vs Sign up)
+===================================================================== */
+function switchAuthTab(tab){
+  $('#tab-login').classList.toggle('active', tab==='login');
+  $('#tab-signup').classList.toggle('active', tab==='signup');
+  $('#panel-login').style.display = tab==='login' ? 'block' : 'none';
+  $('#panel-signup').style.display = tab==='signup' ? 'block' : 'none';
+  $('#li-error').style.display='none';
+  $('#ls-error').style.display='none';
+}
+
+function showAuthError(el, message){
+  el.textContent = message;
+  el.style.display = 'block';
+}
+
+// Translates raw Firebase Auth error codes into messages people can act on.
+function friendlyAuthError(e){
+  const code = e && e.code ? e.code : '';
+  if(code.includes('email-already-in-use')) return 'An account already exists for this email — try logging in instead.';
+  if(code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login-credentials')) return 'Incorrect email or password, or this email signed up with Google — try "Continue with Google" instead.';
+  if(code.includes('user-not-found')) return 'No account found for this email — sign up first, or use "Continue with Google" if that\u2019s how you signed up.';
+  if(code.includes('weak-password')) return 'Password is too weak — use at least 6 characters.';
+  if(code.includes('invalid-email')) return 'That email address looks invalid.';
+  if(code.includes('too-many-requests')) return 'Too many attempts — please wait a moment and try again.';
+  return 'Something went wrong: ' + (e && e.message ? e.message : e);
+}
+
+/* -------- Log in with email + password (existing users) -------- */
+async function loginWithPassword(){
+  const errEl = $('#li-error');
+  errEl.style.display='none';
+  const email = $('#li-email').value.trim();
+  const password = $('#li-password').value;
+
+  if(!email || !password){ showAuthError(errEl,'Enter your email and password.'); return; }
+  if(!email.toLowerCase().endsWith('@ternaengg.ac.in')){ showAuthError(errEl,'Use your @ternaengg.ac.in email.'); return; }
+
+  try{
+    session._freshSignIn = true;
+    await signInWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged (single source of truth) picks this up and
+    // takes the user into the app — no need to call handleAuthUser here too.
+  }catch(e){
+    session._freshSignIn = false;
+    console.error(e);
+    showAuthError(errEl, friendlyAuthError(e));
+  }
+}
+
+/* -------- Sign up with email + password (new users) -------- */
+async function signupWithPassword(){
+  const errEl = $('#ls-error');
+  errEl.style.display='none';
+
+  const name = $('#ls-name').value.trim();
+  const email = $('#ls-email').value.trim();
+  const idVal = $('#ls-id').value.trim().toUpperCase();
+  const password = $('#ls-password').value;
+  const password2 = $('#ls-password2').value;
+  const roleInput = document.querySelector('input[name="ls-role"]:checked');
+  const role = roleInput ? roleInput.value : 'student';
+
+  if(!name || !email || !idVal || !password){ showAuthError(errEl,'Please fill in all fields.'); return; }
+  if(!email.toLowerCase().endsWith('@ternaengg.ac.in')){ showAuthError(errEl,'Use your @ternaengg.ac.in email.'); return; }
+  if(password.length < 6){ showAuthError(errEl,'Password must be at least 6 characters.'); return; }
+  if(password !== password2){ showAuthError(errEl,'Passwords do not match.'); return; }
+
+  try{
+    // Suppress the onAuthStateChanged listener while we finish creating the
+    // Firestore profile doc ourselves — otherwise it fires the instant
+    // createUserWithEmailAndPassword signs the user in (before our setDoc
+    // below has run) and incorrectly routes to the "first-time" screen.
+    session._suppressAuthListener = true;
+    // Firebase Auth stores/hashes the password itself — the app never
+    // touches or persists the raw password anywhere.
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const status = (role==='student' || role==='chairperson' || role==='participant') ? 'confirmed' : 'pending';
+    const newUser = { name, email, tuId: idVal, role, status, teamId:null, points:0 };
+    await setDoc(doc(db,'users',cred.user.uid), newUser);
+    session.currentUserId = cred.user.uid;
+    toast(status==='confirmed' ? 'Account created — welcome!' : 'Account created — awaiting Chairperson confirmation');
+    await loadAllData();
+    enterApp();
+  }catch(e){
+    console.error(e);
+    if(e && e.code && e.code.includes('email-already-in-use')){
+      // Account already exists — route to Log in with a clear message
+      // instead of a raw Firebase error.
+      switchAuthTab('login');
+      $('#li-email').value = email;
+      showAuthError($('#li-error'), 'An account already exists for this email — log in below.');
+      toast('This email is already registered — please log in instead.');
+    } else {
+      showAuthError(errEl, friendlyAuthError(e));
+    }
+  }finally{
+    session._suppressAuthListener = false;
+  }
+}
+
+/* =====================================================================
+   SIGNUP FORM (Google first-time completion)
+===================================================================== */
+function selectRole(input){
+  const scope = input.closest('.role-options') || document;
+  scope.querySelectorAll('.role-opt').forEach(o=>o.classList.remove('active'));
+  input.closest('.role-opt').classList.add('active');
+}
+async function cancelGoogleSignup(){
+  session._pendingSignup = null;
+  session._freshSignIn = false;
+  await signOut(auth);
+  $('#view-signup').style.display='none';
+  $('#view-landing').style.display='flex';
+  switchAuthTab('login');
+}
+async function completeSignup(){
+  const name = $('#su-name').value.trim();
+  const idVal = $('#su-id').value.trim().toUpperCase();
+  const role = document.querySelector('input[name="role"]:checked').value;
+  if(!name || !idVal){
+    $('#su-error').style.display='block';
+    return;
+  }
+  const pending = session._pendingSignup;
+  // Chairperson has no one above them to confirm them, so they're active
+  // immediately. Every other non-student role waits for a Chairperson.
+  const status = (role==='student' || role==='chairperson' || role==='participant') ? 'confirmed' : 'pending';
+  const newUser = {
+    name, email: pending.email, tuId: idVal,
+    role, status, teamId:null, points:0
+  };
+  await setDoc(doc(db,'users',pending.id), newUser);
+  session.currentUserId = pending.id;
+  $('#view-signup').style.display='none';
+  toast(status==='confirmed' ? 'Account created — welcome!' : 'Account created — awaiting Chairperson confirmation');
+  await loadAllData();
+  enterApp();
+}
+
+/* =====================================================================
+   APP SHELL / NAV
+===================================================================== */
+const NAV_CONFIG = [
+  { id:'home', label:'Home', icon:'\uD83C\uDFE0' },
+  { id:'teams', label:'Teams', icon:'\uD83D\uDC65' },
+  { id:'sessions', label:'Sessions', icon:'\uD83C\uDFA4' },
+  { id:'groups', label:'Groups', icon:'\uD83D\uDCAC' },
+  { id:'feedback', label:'Feedback', icon:'\uD83D\uDCDD' },
+  { id:'profile', label:'Profile', icon:'\uD83D\uDC64' },
+];
+function roleLabel(role){
+  return { chairperson:'Chairperson', vice_chair:'Vice Chairperson', team_head:'Team Head', student:'Student', participant:'Participant' }[role] || role;
+}
+function enterApp(){
+  $('#view-landing').style.display='none';
+  $('#view-signup').style.display='none';
+  $('#app-shell').classList.add('show');
+  renderShell();
+  navigate('home');
+  if(pendingScanSessionId){
+    const sid = pendingScanSessionId;
+    pendingScanSessionId = null;
+    history.replaceState(null,'',location.pathname);
+    setTimeout(()=>handleSessionScan(sid), 300);
+  } else if(pendingFeedbackFormId){
+    const fid = pendingFeedbackFormId;
+    pendingFeedbackFormId = null;
+    history.replaceState(null,'',location.pathname);
+    navigate('feedback');
+    setTimeout(()=>openPublicFillModal(fid), 300);
+  }
+}
+async function logout(){
+  await signOut(auth);
+  session.currentUserId = null;
+  $('#app-shell').classList.remove('show');
+  $('#view-landing').style.display='flex';
+  ['li-email','li-password','ls-name','ls-email','ls-id','ls-password','ls-password2'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value='';
+  });
+  switchAuthTab('login');
+}
+function renderShell(){
+  const u = currentUser();
+  const hiddenForRole = u.role==='participant' ? ['teams','groups'] : [];
+  const visibleNav = NAV_CONFIG.filter(n=>!hiddenForRole.includes(n.id));
+  const navHtml = visibleNav.map(n=>`
+    <a href="#" class="nav-item" data-nav="${n.id}" onclick="navigate('${n.id}');return false;">
+      <span class="ic">${n.icon}</span><span class="label">${n.label}</span>
+    </a>`).join('');
+  $('#nav-items').innerHTML = navHtml;
+  $('#drawer-nav-items').innerHTML = navHtml;
+  const bottomHtml = visibleNav.filter(n=>n.id!=='feedback').map(n=>`
+    <a href="#" class="bottom-nav-item" data-nav="${n.id}" onclick="navigate('${n.id}');return false;">
+      <span class="ic">${n.icon}</span><span>${n.label}</span>
+    </a>`).join('');
+  $('#bottom-nav-items').innerHTML = bottomHtml;
+  $('#side-role-badge').innerHTML = `<span class="role-badge">${roleLabel(u.role)}</span>`;
+  $('#side-user-name').textContent = u.name;
+  $('#side-user-email').textContent = u.email;
+  $('#drawer-role-badge').innerHTML = `<span class="role-badge">${roleLabel(u.role)}</span>`;
+  $('#drawer-user-name').textContent = u.name;
+  $('#drawer-user-email').textContent = u.email;
+  renderBell();
+}
+function setActiveNav(id){
+  $all('.nav-item, .bottom-nav-item').forEach(n=>n.classList.toggle('active', n.dataset.nav===id));
+}
+function navigate(page){
+  currentPage = page;
+  setActiveNav(page);
+  closeDrawer();
+  $('#bell-panel')?.classList.remove('show');
+  const titles = { home:'Home', teams:'Teams', sessions:'Sessions', groups:'Groups', feedback:'Feedback', profile:'My profile' };
+  $('#page-title').textContent = titles[page] || page;
+  const u = currentUser();
+  const content = $('#content');
+  if(page==='home') content.innerHTML = renderHome(u);
+  else if(page==='teams') content.innerHTML = renderTeams(u);
+  else if(page==='sessions') content.innerHTML = renderSessions(u);
+  else if(page==='groups') content.innerHTML = renderGroupsList(u);
+  else if(page==='feedback') content.innerHTML = renderFeedback(u);
+  else if(page==='profile') content.innerHTML = renderProfile(u);
+}
+
+/* =====================================================================
+   HOME DASHBOARD
+===================================================================== */
+function renderHome(u){
+  const teamCount = DB.teams.length;
+  const memberCount = DB.teams.reduce((a,t)=>a+(t.memberIds?.length||0),0);
+  const liveSessions = DB.sessions.filter(s=> new Date(s.date) >= new Date());
+  const pendingHeads = DB.users.filter(x=>x.status==='pending');
+  const upcoming = [...DB.sessions]
+    .filter(s=> new Date(s.date) >= new Date())
+    .sort((a,b)=> new Date(a.date)-new Date(b.date))
+    .slice(0,4);
+
+  let adminBlock = '';
+  if(u.role==='chairperson' || u.role==='vice_chair'){
+    adminBlock = `
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card">
+          <h3>Pending position requests</h3>
+          ${pendingHeads.length ? pendingHeads.map(p=>`
+            <div class="list-row">
+              <div class="row-left">
+                <div class="avatar-sm" style="background:${avatarColor(p.id)}20;color:${avatarColor(p.id)};">${initials(p.name)}</div>
+                <div><div class="row-name">${p.name}</div><div class="row-sub">${roleLabel(p.role)} \u00b7 ${p.tuId}</div></div>
+              </div>
+              <button class="btn btn-sm btn-primary" onclick="openAssignModal('${p.id}')">Review</button>
+            </div>`).join('') : `<div class="empty">No pending requests right now.</div>`}
+        </div>
+        <div class="card">
+          <h3>Upcoming sessions</h3>
+          ${upcoming.length ? upcoming.map(s=>`
+            <div class="list-row">
+              <div><div class="row-name">${s.title}</div><div class="row-sub">${formatDate(s.date)}</div></div>
+            </div>`).join('') : `<div class="empty">Nothing scheduled yet.</div>`}
+        </div>
+      </div>`;
+  }
+
+  let headBanner = '';
+  if(u.role==='team_head' && u.teamId){
+    const t = teamById(u.teamId);
+    if(t) headBanner = `<div class="assign-banner"><span class="emoji">\uD83C\uDF89</span><span>You're the <strong>Head</strong> of <strong>${t.name}</strong> \u2014 ${t.memberIds.length}/${t.maxSize} members on board.</span></div>`;
+  }
+
+  return `
+    ${headBanner}
+    <div class="grid grid-4">
+      <div class="card card-stat"><div class="stat">${teamCount}</div><div class="stat-label">Active teams</div></div>
+      <div class="card card-stat accent-navy"><div class="stat">${memberCount}</div><div class="stat-label">Team members</div></div>
+      <div class="card card-stat accent-success"><div class="stat">${liveSessions.length}</div><div class="stat-label">Upcoming sessions</div></div>
+      <div class="card card-stat accent-gold"><div class="stat">${u.points||0}</div><div class="stat-label">Your credit points</div></div>
+    </div>
+    ${adminBlock}
+    <div class="grid grid-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>Teams</h3>
+        ${DB.teams.length ? DB.teams.slice(0,5).map(t=>`
+          <div class="list-row">
+            <div class="row-left">
+              <div><div class="row-name">${t.name}</div><div class="row-sub">${t.memberIds.length}/${t.maxSize} members \u00b7 Head: ${t.headId ? (userById(t.headId)?.name||'Unassigned') : 'Unassigned'}</div></div>
+            </div>
+          </div>`).join('') : `<div class="empty">No teams created yet.</div>`}
+      </div>
+      <div class="card">
+        <h3>Sessions</h3>
+        ${DB.sessions.length ? DB.sessions.slice(0,5).map(s=>`
+          <div class="list-row">
+            <div class="row-left">
+              <div><div class="row-name">${s.title}</div><div class="row-sub">${formatDate(s.date)}</div></div>
+            </div>
+            ${sessionBadge(s)}
+          </div>`).join('') : `<div class="empty">No sessions yet.</div>`}
+      </div>
+    </div>
+  `;
+}
+
+/* =====================================================================
+   TEAMS
+===================================================================== */
+function renderTeams(u){
+  let createBtn = '';
+  if(u.role==='chairperson' || u.role==='vice_chair'){
+    createBtn = `<button class="btn btn-primary" onclick="openCreateTeamModal()">+ Create team</button>`;
+  }
+  let pendingHeadsBlock = '';
+  if(u.role==='chairperson' || u.role==='vice_chair'){
+    const pendingHeads = DB.users.filter(x=>x.status==='pending' && x.role==='team_head');
+    pendingHeadsBlock = `
+      <div class="card" style="margin-bottom:16px;">
+        <h3>Members who signed up as Team Head</h3>
+        ${pendingHeads.length ? pendingHeads.map(p=>`
+          <div class="list-row">
+            <div class="row-left">
+              <div class="avatar-sm" style="background:${avatarColor(p.id)}20;color:${avatarColor(p.id)};">${initials(p.name)}</div>
+              <div><div class="row-name">${p.name}</div><div class="row-sub">${p.email} \u00b7 ${p.tuId}</div></div>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="openAssignModal('${p.id}')">Assign to a team</button>
+          </div>`).join('') : `<div class="empty">No one has signed up as Team Head yet.</div>`}
+      </div>`;
+  }
+
+  const teamsBlock = DB.teams.map(t=>{
+    const head = t.headId ? userById(t.headId) : null;
+    const members = t.memberIds.map(id=>userById(id)).filter(Boolean);
+    const isMyHeadTeam = t.headId === u.id;
+    const canApprove = (u.role==='chairperson'||u.role==='vice_chair'||isMyHeadTeam);
+    const requests = DB.teamRequests.filter(r=>r.teamId===t.id && r.status==='pending');
+    return `
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div>
+            <h3 style="margin-bottom:2px;">${t.name}</h3>
+            <div class="row-sub">Head: ${head ? head.name : 'Unassigned'} \u00b7 ${t.memberIds.length}/${t.maxSize} members</div>
+          </div>
+          ${(u.role==='chairperson'||u.role==='vice_chair') ? `<button class="link-btn" onclick="openEditTeamModal('${t.id}')">Edit size</button>` : ''}
+        </div>
+        <div style="margin-top:12px;">
+          ${members.length ? members.map(m=>`
+            <div class="list-row">
+              <div class="row-left">
+                <div class="avatar-sm" style="background:${avatarColor(m.id)}20;color:${avatarColor(m.id)};">${initials(m.name)}</div>
+                <div><div class="row-name">${m.name}</div><div class="row-sub">${m.tuId}</div></div>
+              </div>
+            </div>`).join('') : `<div class="empty">No members yet.</div>`}
+        </div>
+        ${canApprove && requests.length ? `
+          <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
+            <div class="row-sub" style="margin-bottom:8px;font-weight:600;">Join requests</div>
+            ${requests.map(r=>{
+              const s = userById(r.studentId);
+              if(!s) return '';
+              return `<div class="list-row">
+                <div class="row-left">
+                  <div class="avatar-sm" style="background:${avatarColor(s.id)}20;color:${avatarColor(s.id)};">${initials(s.name)}</div>
+                  <div><div class="row-name">${s.name}</div><div class="row-sub">${s.tuId}</div></div>
+                </div>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-sm btn-success" onclick="approveJoin('${r.id}')">Approve</button>
+                  <button class="btn btn-sm btn-danger-outline" onclick="rejectJoin('${r.id}')">Reject</button>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>` : ''}
+        ${u.role==='student' && !u.teamId ? `
+          <div style="margin-top:10px;">
+            ${t.memberIds.length>=t.maxSize
+              ? `<span class="badge badge-pending">Team full</span>`
+              : hasPendingRequest(u.id,t.id)
+                ? `<span class="badge badge-pending">Request pending</span>`
+                : `<button class="btn btn-sm btn-primary" onclick="enrollTeam('${t.id}')">Enroll for team</button>`
+            }
+          </div>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="page-header">${createBtn}</div>
+    ${pendingHeadsBlock}
+    ${u.role==='chairperson' ? renderAttendancePermissionsCard() : ''}
+    ${teamsBlock || '<div class="empty">No teams created yet.</div>'}
+  `;
+}
+function hasPendingRequest(studentId, teamId){
+  return DB.teamRequests.some(r=>r.studentId===studentId && r.teamId===teamId && r.status==='pending');
+}
+async function enrollTeam(teamId){
+  const u = currentUser();
+  if(hasPendingRequest(u.id, teamId)){ toast('Request already pending'); return; }
+  const id = 'r'+Date.now();
+  await setDoc(doc(db,'teamRequests',id), { studentId:u.id, teamId, status:'pending' });
+  await loadAllData();
+  toast('Request sent to the Team Head');
+  navigate('teams');
+}
+async function approveJoin(reqId){
+  const r = DB.teamRequests.find(x=>x.id===reqId);
+  const t = teamById(r.teamId);
+  await updateDoc(doc(db,'teamRequests',reqId), { status:'approved' });
+  const newMemberIds = Array.from(new Set([...(t.memberIds||[]), r.studentId]));
+  await updateDoc(doc(db,'teams',t.id), { memberIds:newMemberIds });
+  await updateDoc(doc(db,'users',r.studentId), { teamId:t.id });
+  const groupRef = doc(db,'groups','g-'+t.id);
+  const gSnap = await getDoc(groupRef);
+  if(gSnap.exists()){
+    const gMembers = Array.from(new Set([...(gSnap.data().memberIds||[]), r.studentId]));
+    await updateDoc(groupRef, { memberIds:gMembers });
+  } else {
+    await setDoc(groupRef, { name:t.name, memberIds:[r.studentId], messages:[] });
+  }
+  await loadAllData();
+  toast('Member added to '+t.name);
+  navigate('teams');
+}
+async function rejectJoin(reqId){
+  await updateDoc(doc(db,'teamRequests',reqId), { status:'rejected' });
+  await loadAllData();
+  toast('Request rejected');
+  navigate('teams');
+}
+function openCreateTeamModal(){
+  openModal(`
+    <h3>Create a new team</h3>
+    <div class="form-group"><label>Team name</label><input class="field-input" id="nt-name" placeholder="e.g. Design Team"/></div>
+    <div class="form-group"><label>Maximum members</label><input class="field-input" id="nt-size" type="number" value="8" min="1"/></div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createTeam()">Create team</button>
+    </div>
+  `);
+}
+async function createTeam(){
+  const name = $('#nt-name').value.trim();
+  const size = parseInt($('#nt-size').value) || 8;
+  if(!name){ toast('Enter a team name'); return; }
+  const id = 't'+Date.now();
+  await setDoc(doc(db,'teams',id), { name, headId:null, maxSize:size, memberIds:[] });
+  await setDoc(doc(db,'groups','g-'+id), { name, memberIds:[], messages:[] });
+  closeModal();
+  await loadAllData();
+  toast('Team created');
+  navigate('teams');
+}
+function openEditTeamModal(teamId){
+  const t = teamById(teamId);
+  openModal(`
+    <h3>Edit ${t.name}</h3>
+    <div class="form-group"><label>Maximum members</label><input class="field-input" id="et-size" type="number" value="${t.maxSize}" min="${t.memberIds.length}"/></div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTeamSize('${teamId}')">Save</button>
+    </div>
+  `);
+}
+async function saveTeamSize(teamId){
+  const t = teamById(teamId);
+  const newSize = parseInt($('#et-size').value) || t.maxSize;
+  await updateDoc(doc(db,'teams',teamId), { maxSize:newSize });
+  closeModal();
+  await loadAllData();
+  toast('Team size updated');
+  navigate('teams');
+}
+function openAssignModal(personId){
+  const p = userById(personId);
+  const teamOptions = DB.teams.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  const isChairRole = p.role==='vice_chair' || p.role==='chairperson';
+  openModal(`
+    <h3>Confirm ${p.name}</h3>
+    <div class="row-sub" style="margin-bottom:14px;">${p.email} \u00b7 ${p.tuId} \u00b7 requested: ${roleLabel(p.role)}</div>
+    ${isChairRole ? `
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">This confirms them as ${roleLabel(p.role)} with full access.</p>
+      <div class="modal-close-row">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger-outline" onclick="rejectPosition('${p.id}')">Reject</button>
+        <button class="btn btn-primary" onclick="confirmPosition('${p.id}', null)">Confirm as ${roleLabel(p.role)}</button>
+      </div>
+    ` : `
+      <div class="form-group">
+        <label>Assign as Head of team</label>
+        <select class="field-input" id="assign-team-select">${teamOptions || '<option disabled>No teams created yet</option>'}</select>
+      </div>
+      <div class="modal-close-row">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger-outline" onclick="rejectPosition('${p.id}')">Reject</button>
+        <button class="btn btn-primary" onclick="confirmPosition('${p.id}', document.getElementById('assign-team-select').value)">Confirm as Team Head</button>
+      </div>
+    `}
+  `);
+}
+async function confirmPosition(personId, teamId){
+  const p = userById(personId);
+  await updateDoc(doc(db,'users',personId), { status:'confirmed' });
+  if(teamId){
+    const t = teamById(teamId);
+    await updateDoc(doc(db,'teams',teamId), { headId:personId });
+    const groupRef = doc(db,'groups','g-'+teamId);
+    const gSnap = await getDoc(groupRef);
+    if(gSnap.exists()){
+      const members = Array.from(new Set([...(gSnap.data().memberIds||[]), personId]));
+      await updateDoc(groupRef, { memberIds:members });
+    } else {
+      await setDoc(groupRef, { name:t.name, memberIds:[personId], messages:[] });
+    }
+    await pushNotification(personId, `You've been assigned as Head of ${t.name}!`, '\uD83C\uDF89');
+    toast(p.name+' confirmed as Head of '+t.name);
+  } else {
+    await ensureLeadershipGroupHasMember(personId);
+    await pushNotification(personId, `You've been confirmed as ${roleLabel(p.role)}.`, '\u2705');
+    toast(p.name+' confirmed as '+roleLabel(p.role));
+  }
+  closeModal();
+  await loadAllData();
+  navigate(currentPage==='home'?'home':'teams');
+}
+async function rejectPosition(personId){
+  await updateDoc(doc(db,'users',personId), { role:'student', status:'confirmed' });
+  await pushNotification(personId, `Your position request was not approved \u2014 you're set as Student for now.`, '\u2139\uFE0F');
+  closeModal();
+  await loadAllData();
+  toast('Request rejected \u2014 moved to Student role');
+  navigate(currentPage);
+}
+
+/* =====================================================================
+   SESSIONS — creation is restricted to the Chairperson only
+===================================================================== */
+function sessionLink(id){
+  return location.origin + location.pathname + '?session=' + id;
+}
+function enrollClosed(s){
+  if(!s.enrollDeadline) return false;
+  return new Date() > new Date(s.enrollDeadline);
+}
+function renderSessions(u){
+  const canCreate = u.role==='chairperson';
+  const createBtn = canCreate ? `<button class="btn btn-gold" onclick="openCreateSessionModal()">+ New session</button>` : '';
+
+  const sorted = [...DB.sessions].sort((a,b)=> new Date(a.date)-new Date(b.date));
+  const cards = sorted.map(s=>{
+    const isRegistered = (s.registrations||[]).some(r=>r.studentId===u.id);
+    const canManage = (u.role==='chairperson'||u.role==='vice_chair');
+    const canAttend = u.role==='chairperson' || u.canMarkAttendance;
+    const link = sessionLink(s.id);
+    const closed = enrollClosed(s);
+    const linkedForm = DB.feedbackForms.find(f=>f.sessionId===s.id);
+    const alreadyGaveFeedback = linkedForm && DB.feedbackResponses.some(r=>r.formId===linkedForm.id && r.submittedBy===u.id);
+    const canRegisterRole = (u.role==='student' || u.role==='participant');
+    return `
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div>
+            <h3 style="margin-bottom:2px;">${s.title}</h3>
+            <div class="row-sub">${formatDate(s.date)} \u00b7 Speaker: ${s.speaker} \u00b7 Capacity ${s.capacity}</div>
+            ${s.enrollDeadline ? `<div class="row-sub" style="margin-top:2px;">${closed?'\uD83D\uDD34 Enrollment closed \u00b7 was open till ':'\uD83D\uDFE2 Enrollment open till '}${formatDate(s.enrollDeadline)}</div>` : ''}
+          </div>
+          ${sessionBadge(s)}
+        </div>
+        <p style="font-size:13px;color:var(--text-muted);margin:10px 0;">${s.description}</p>
+
+        ${canManage ? `<div class="link-box"><span>\uD83D\uDD17</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>` : ''}
+
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          ${canRegisterRole && !isRegistered && !closed ? `<button class="btn btn-sm btn-primary" onclick="registerSession('${s.id}')">Register</button>` : ''}
+          ${canRegisterRole && !isRegistered && closed ? `<span class="badge badge-pending">Enrollment closed</span>` : ''}
+          ${canRegisterRole && isRegistered ? `<span class="badge badge-confirmed">Registered</span>` : ''}
+          ${isRegistered && linkedForm && !alreadyGaveFeedback ? `<button class="btn btn-sm btn-gold" onclick="openPublicFillModal('${linkedForm.id}')">\uD83D\uDCDD Give feedback</button>` : ''}
+          ${isRegistered && linkedForm && alreadyGaveFeedback ? `<span class="badge badge-confirmed">Feedback submitted</span>` : ''}
+          ${canManage ? `<button class="btn btn-sm" onclick="viewRegistrations('${s.id}')">View registrations (${(s.registrations||[]).length})</button>` : ''}
+          ${canManage ? `<button class="btn btn-sm" onclick="openSessionQrModal('${s.id}')">\uD83D\uDCF2 QR</button>` : ''}
+          ${canManage ? `<button class="btn btn-sm" onclick="openEditEnrollModal('${s.id}')">\u23F1\uFE0F Enrollment window</button>` : ''}
+          ${u.role==='chairperson' ? `<button class="btn btn-sm btn-danger-outline" onclick="deleteSession('${s.id}')">Delete</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `<div class="page-header">${createBtn}</div>${cards || '<div class="empty">No sessions yet.</div>'}`;
+}
+function copyLink(link){
+  navigator.clipboard?.writeText(link);
+  toast('Link copied to clipboard');
+}
+async function deleteSession(id){
+  await deleteDoc(doc(db,'sessions',id));
+  await loadAllData();
+  toast('Session removed from the live site');
+  navigate('sessions');
+}
+function registerSession(id){
+  const s = DB.sessions.find(x=>x.id===id);
+  if(enrollClosed(s)){ toast('Enrollment window for this session has closed.'); return; }
+  const questions = s.questions||[];
+  openModal(`
+    <h3>Register: ${s.title}</h3>
+    <div id="reg-questions">
+      ${questions.map((q,i)=>`<div class="form-group"><label>${q}</label><input class="field-input" id="reg-q-${i}"/></div>`).join('')}
+    </div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitRegistration('${id}')">Submit registration</button>
+    </div>
+  `);
+}
+async function submitRegistration(sessionId){
+  const s = DB.sessions.find(x=>x.id===sessionId);
+  if(enrollClosed(s)){ toast('Enrollment window for this session has closed.'); closeModal(); return; }
+  const u = currentUser();
+  const answers = (s.questions||[]).map((q,i)=>$('#reg-q-'+i).value.trim());
+  const newRegs = [...(s.registrations||[]), { studentId:u.id, answers, attended:false, feedback:'' }];
+  await updateDoc(doc(db,'sessions',sessionId), { registrations:newRegs });
+  closeModal();
+  await loadAllData();
+  toast('You are registered for '+s.title);
+  navigate('sessions');
+  // If this session has a linked feedback form, bring it up right away.
+  const linkedForm = DB.feedbackForms.find(f=>f.sessionId===sessionId);
+  if(linkedForm) setTimeout(()=>openPublicFillModal(linkedForm.id), 500);
+}
+function viewRegistrations(sessionId){
+  const s = DB.sessions.find(x=>x.id===sessionId);
+  const u = currentUser();
+  const canAttend = u.role==='chairperson' || u.canMarkAttendance;
+  const rows = (s.registrations||[]).map(r=>{
+    const st = userById(r.studentId);
+    return `<tr>
+      <td>${st ? st.name : r.studentId}</td>
+      <td>${st ? st.tuId : ''}</td>
+      <td>${(r.answers||[]).join(' / ')}</td>
+      <td>${r.attended ? '<span class="badge badge-confirmed">Attended</span>' : '<span class="badge badge-pending">Not marked</span>'}</td>
+      <td>${canAttend ? `<button class="btn btn-sm ${r.attended?'':'btn-success'}" onclick="markAttendance('${sessionId}','${r.studentId}',${!r.attended})">${r.attended?'Undo':'Mark present'}</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+  openModal(`
+    <h3>Registrations \u2014 ${s.title}</h3>
+    <div style="overflow-x:auto;">
+    <table>
+      <tr><th>Name</th><th>College ID</th><th>Answers</th><th>Attendance</th><th></th></tr>
+      ${rows || '<tr><td colspan="5" style="color:var(--text-muted);">No registrations yet.</td></tr>'}
+    </table>
+    </div>
+    <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
+  `);
+}
+async function markAttendance(sessionId, studentId, newVal){
+  const s = DB.sessions.find(x=>x.id===sessionId);
+  const newRegs = (s.registrations||[]).map(r=> r.studentId===studentId ? { ...r, attended:newVal } : r);
+  await updateDoc(doc(db,'sessions',sessionId), { registrations:newRegs });
+  if(newVal){
+    const existingCert = DB.certificates.find(c=>c.sessionId===sessionId && c.studentId===studentId);
+    if(!existingCert){
+      const code = generateCertCode();
+      await setDoc(doc(db,'certificates',code), {
+        sessionId, sessionTitle:s.title, sessionDate:s.date, studentId,
+        name:'', issuedAt:Date.now(), issuedBy:currentUser().id
+      });
+      await pushNotification(studentId, `Your attendance for "${s.title}" is marked \u2014 your e-certificate is ready! Add your name in Profile to download it.`, '\uD83C\uDF93');
+    }
+  }
+  await loadAllData();
+  toast(newVal ? 'Marked present \u2014 certificate generated' : 'Attendance undone');
+  viewRegistrations(sessionId);
+}
+function openSessionQrModal(sessionId){
+  const s = DB.sessions.find(x=>x.id===sessionId);
+  const link = sessionLink(sessionId);
+  openModal(`
+    <h3>\uD83D\uDCF2 QR \u2014 ${s.title}</h3>
+    <div class="qr-box">
+      <div class="qr-canvas-wrap" id="qr-canvas-wrap"></div>
+      <div class="link-box" style="width:100%;"><span>\uD83D\uDD17</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>
+      <div style="font-size:12px;color:var(--text-muted);text-align:center;">Scanning this logs the participant in, enrolls them if they haven\u2019t already, and then shows the session\u2019s feedback form.</div>
+    </div>
+    <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
+  `);
+  const target = $('#qr-canvas-wrap');
+  if(target){
+    target.innerHTML='';
+    if(window.QRCode){
+      new QRCode(target, { text: link, width:180, height:180, colorDark:'#003B5C', colorLight:'#ffffff' });
+    } else {
+      target.innerHTML = `<div class="empty">QR library failed to load \u2014 use the link above instead.</div>`;
+    }
+  }
+}
+function openEditEnrollModal(sessionId){
+  const s = DB.sessions.find(x=>x.id===sessionId);
+  openModal(`
+    <h3>Enrollment window \u2014 ${s.title}</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Decide how late people can still enroll for this session \u2014 e.g. keep it open a day or two after the event if the site went up late.</p>
+    <div class="form-group"><label>Enrollment closes</label><input class="field-input" id="ee-deadline" type="datetime-local" value="${(s.enrollDeadline||s.date||'').slice(0,16)}"/></div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger-outline" onclick="clearEnrollDeadline('${sessionId}')">Leave open (no deadline)</button>
+      <button class="btn btn-primary" onclick="saveEnrollDeadline('${sessionId}')">Save</button>
+    </div>
+  `);
+}
+async function saveEnrollDeadline(sessionId){
+  const val = $('#ee-deadline').value;
+  if(!val){ toast('Pick a date & time'); return; }
+  await updateDoc(doc(db,'sessions',sessionId), { enrollDeadline: val });
+  closeModal();
+  await loadAllData();
+  toast('Enrollment window updated');
+  navigate('sessions');
+}
+async function clearEnrollDeadline(sessionId){
+  await updateDoc(doc(db,'sessions',sessionId), { enrollDeadline: null });
+  closeModal();
+  await loadAllData();
+  toast('Enrollment left open \u2014 no deadline');
+  navigate('sessions');
+}
+function openCreateSessionModal(){
+  openModal(`
+    <h3>Create a new session</h3>
+    <div class="form-group"><label>Session title</label><input class="field-input" id="ns-title"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>Speaker name</label><input class="field-input" id="ns-speaker"/></div>
+      <div class="form-group"><label>Capacity</label><input class="field-input" id="ns-capacity" type="number" value="60"/></div>
+    </div>
+    <div class="form-group"><label>Date & time</label><input class="field-input" id="ns-date" type="datetime-local"/></div>
+    <div class="form-group"><label>Enrollment closes (optional \u2014 leave blank to keep open)</label><input class="field-input" id="ns-deadline" type="datetime-local"/></div>
+    <div class="form-group"><label>Description</label><textarea class="field-input" id="ns-desc" rows="3"></textarea></div>
+    <div class="form-group">
+      <label>Registration questions</label>
+      <div class="questions-list" id="ns-questions">
+        <div class="q-item"><input class="field-input" placeholder="e.g. Branch & Year" style="margin-bottom:0;"/><button onclick="this.parentElement.remove()">\u00d7</button></div>
+      </div>
+      <button class="link-btn" onclick="addQuestionField()">+ Add question</button>
+    </div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createSession()">Create session</button>
+    </div>
+  `);
+}
+function addQuestionField(){
+  const wrap = $('#ns-questions');
+  const div = document.createElement('div');
+  div.className='q-item';
+  div.innerHTML = `<input class="field-input" placeholder="Question" style="margin-bottom:0;"/><button onclick="this.parentElement.remove()">\u00d7</button>`;
+  wrap.appendChild(div);
+}
+async function createSession(){
+  const u = currentUser();
+  const title = $('#ns-title').value.trim();
+  const speaker = $('#ns-speaker').value.trim();
+  const capacity = parseInt($('#ns-capacity').value) || 50;
+  const date = $('#ns-date').value || new Date().toISOString().slice(0,16);
+  const enrollDeadline = $('#ns-deadline').value || null;
+  const desc = $('#ns-desc').value.trim();
+  const questions = Array.from($all('#ns-questions input')).map(i=>i.value.trim()).filter(Boolean);
+  if(!title || !speaker){ toast('Enter at least a title and speaker'); return; }
+  const id = 's'+Date.now();
+  await setDoc(doc(db,'sessions',id), {
+    title, speaker, description: desc||'No description provided.', date, capacity, enrollDeadline,
+    questions: questions.length?questions:['Branch & Year'],
+    createdBy:u.id, registrations:[]
+  });
+  closeModal();
+  await loadAllData();
+  toast('Session created and published');
+  navigate('sessions');
+}
+
+/* =====================================================================
+   SESSION QR SCAN FLOW — someone scans the session QR while logged in:
+   enroll them if new, tell them if already enrolled, then surface the
+   linked feedback form either way.
+===================================================================== */
+async function handleSessionScan(sessionId){
+  const s = DB.sessions.find(x=>x.id===sessionId);
+  if(!s){ toast('That session link looks invalid.'); return; }
+  const u = currentUser();
+  const already = (s.registrations||[]).some(r=>r.studentId===u.id);
+  navigate('sessions');
+  const linkedForm = DB.feedbackForms.find(f=>f.sessionId===sessionId);
+  if(already){
+    toast(`You're already enrolled in ${s.title}`);
+    if(linkedForm){
+      const gaveFeedback = DB.feedbackResponses.some(r=>r.formId===linkedForm.id && r.submittedBy===u.id);
+      if(!gaveFeedback) setTimeout(()=>openPublicFillModal(linkedForm.id), 400);
+    }
+  } else {
+    if(enrollClosed(s)){ toast('Enrollment window for this session has closed.'); return; }
+    registerSession(sessionId);
+  }
+}
+
+/* =====================================================================
+   CERTIFICATES
+===================================================================== */
+function generateCertCode(){
+  return ('IEEETEC-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)).toUpperCase();
+}
+function certificateInnerHtml(cert, displayName){
+  const s = { title: cert.sessionTitle, date: cert.sessionDate };
+  const verifyLink = location.origin + location.pathname + '?verify=' + cert.id;
+  return `
+    <div class="cert-corner cert-tl"></div>
+    <div class="cert-corner cert-tr"></div>
+    <div class="cert-corner cert-bl"></div>
+    <div class="cert-corner cert-br"></div>
+    <div class="cert-seal">\u2705</div>
+    <div class="cert-brand">
+      <div class="cert-brand-mark">TE</div>
+      <div>
+        <div class="cert-brand-t1">IEEE \u00b7 TERNA ENGINEERING COLLEGE</div>
+        <div class="cert-brand-t2">Student Branch Chapter</div>
+      </div>
+    </div>
+    <div class="cert-title">Certificate of Participation</div>
+    <div class="cert-sub">This is to proudly certify that</div>
+    <div class="cert-name">${displayName || '\u2014'}</div>
+    <div class="cert-sub">has successfully participated in the session</div>
+    <div class="cert-session">${s.title}</div>
+    <div class="cert-sub">held on ${s.date ? formatDate(s.date) : ''}, organized by IEEE-TEC Student Branch, Terna Engineering College.</div>
+    <div class="cert-foot">
+      <div class="cert-sign">
+        <div class="cert-sign-line"></div>
+        <div class="cert-sign-label">Team Head / Convenor</div>
+      </div>
+      <div class="cert-code-block">
+        <div class="cert-qr" id="cert-qr-${cert.id}"></div>
+        <div class="cert-code">${cert.id}</div>
+      </div>
+      <div class="cert-sign">
+        <div class="cert-sign-line"></div>
+        <div class="cert-sign-label">Chairperson, IEEE-TEC</div>
+      </div>
+    </div>
+    <div class="cert-verify-note">\u2705 Digitally verified by IEEE-TEC, Terna Engineering College \u2014 scan the code above to verify authenticity.</div>
+  `;
+}
+function renderCertQr(certId){
+  const target = document.getElementById('cert-qr-'+certId);
+  if(!target || !window.QRCode) return;
+  target.innerHTML='';
+  const link = location.origin + location.pathname + '?verify=' + certId;
+  new QRCode(target, { text: link, width:74, height:74, colorDark:'#003B5C', colorLight:'#ffffff' });
+}
+function openCertificateModal(certId){
+  const cert = DB.certificates.find(c=>c.id===certId);
+  if(!cert) return;
+  if(!cert.name){
+    openModal(`
+      <h3>\uD83C\uDF93 One last step</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Enter your full name exactly as it should appear on the certificate.</p>
+      <div class="form-group"><label>Full name</label><input class="field-input" id="cert-name-input" placeholder="e.g. Aarav S. Sharma"/></div>
+      <div class="modal-close-row">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCertificateName('${certId}')">Generate certificate</button>
+      </div>
+    `);
+    return;
+  }
+  showCertificatePreview(cert, cert.name);
+}
+async function saveCertificateName(certId){
+  const name = $('#cert-name-input').value.trim();
+  if(!name){ toast('Please enter your full name'); return; }
+  await updateDoc(doc(db,'certificates',certId), { name });
+  await loadAllData();
+  toast('Certificate generated!');
+  const cert = DB.certificates.find(c=>c.id===certId);
+  showCertificatePreview(cert, name);
+}
+function showCertificatePreview(cert, name){
+  openModal(`
+    <h3 style="margin-bottom:12px;">\uD83C\uDF93 ${cert.sessionTitle}</h3>
+    <div class="cert-scale-wrap">
+      <div class="cert-card" id="cert-card-${cert.id}">${certificateInnerHtml(cert, name)}</div>
+    </div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="downloadCertificate('${cert.id}')">\u2B07\uFE0F Download certificate</button>
+    </div>
+  `);
+  setTimeout(()=>renderCertQr(cert.id), 80);
+}
+async function downloadCertificate(certId){
+  const node = document.getElementById('cert-card-'+certId);
+  if(!node || !window.html2canvas){ toast('Could not generate the image \u2014 please try again.'); return; }
+  toast('Preparing your download\u2026');
+  try{
+    const canvas = await html2canvas(node, { scale:2, backgroundColor:'#ffffff' });
+    const a = document.createElement('a');
+    a.download = 'IEEE-TEC-Certificate-'+certId+'.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }catch(e){
+    console.error(e);
+    toast('Download failed \u2014 please try again.');
+  }
+}
+
+/* =====================================================================
+   ATTENDANCE PERMISSION DELEGATION — Chairperson can let specific Team
+   Heads mark attendance too.
+===================================================================== */
+function renderAttendancePermissionsCard(){
+  const heads = DB.users.filter(x=>x.role==='team_head' && x.status==='confirmed');
+  if(!heads.length) return '';
+  return `
+    <div class="card" style="margin-bottom:16px;">
+      <h3>Attendance marking permissions</h3>
+      ${heads.map(h=>`
+        <div class="list-row">
+          <div class="row-left">
+            <div class="avatar-sm" style="background:${avatarColor(h.id)}20;color:${avatarColor(h.id)};">${initials(h.name)}</div>
+            <div><div class="row-name">${h.name}</div><div class="row-sub">${teamById(h.teamId)?.name || 'No team'}</div></div>
+          </div>
+          <button class="btn btn-sm ${h.canMarkAttendance?'btn-danger-outline':'btn-success'}" onclick="toggleAttendancePermission('${h.id}',${!h.canMarkAttendance})">${h.canMarkAttendance?'Revoke access':'Grant access'}</button>
+        </div>`).join('')}
+    </div>`;
+}
+async function toggleAttendancePermission(userId, newVal){
+  await updateDoc(doc(db,'users',userId), { canMarkAttendance:newVal });
+  await pushNotification(userId, newVal ? "You've been given permission to mark session attendance." : "Your attendance-marking permission was revoked.", newVal?'\u2705':'\u2139\uFE0F');
+  await loadAllData();
+  toast(newVal ? 'Access granted' : 'Access revoked');
+  navigate('teams');
+}
+
+/* =====================================================================
+   GROUPS / CHAT
+===================================================================== */
+function renderGroupsList(u){
+  const myGroups = DB.groups.filter(g=>(g.memberIds||[]).includes(u.id) || u.role==='chairperson' || u.role==='vice_chair');
+  if(!myGroups.length) return `<div class="empty">You're not part of any group yet. Join a team to get access to its group chat.</div>`;
+  return `
+    <div class="grid grid-2">
+      ${myGroups.map(g=>`
+        <div class="card" style="cursor:pointer;" onclick="openGroup('${g.id}')">
+          <h3>${g.name}</h3>
+          <div class="row-sub">${(g.memberIds||[]).length} members</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">${(g.messages||[]).length ? g.messages[g.messages.length-1].text.slice(0,60) : 'No messages yet'}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+function openGroup(groupId){
+  const g = DB.groups.find(x=>x.id===groupId);
+  const u = currentUser();
+  $('#page-title').textContent = g.name;
+  $('#content').innerHTML = `
+    <button class="link-btn" style="margin-bottom:14px;" onclick="navigate('groups')">\u2190 Back to groups</button>
+    <div class="chat-wrap">
+      <div class="chat-messages" id="chat-messages">
+        ${(g.messages||[]).map(m=>{
+          const from = userById(m.from);
+          const mine = m.from===u.id;
+          return `<div class="msg ${mine?'me':''}">
+            ${!mine ? `<div class="meta">${from ? from.name : m.from}</div>` : ''}
+            <div class="bubble">${m.text}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="chat-input-row">
+        <input id="chat-input" placeholder="Type a message" onkeydown="if(event.key==='Enter')sendMsg('${groupId}')"/>
+        <button class="btn btn-primary" onclick="sendMsg('${groupId}')">Send</button>
+      </div>
+    </div>
+  `;
+  const cm = $('#chat-messages'); cm.scrollTop = cm.scrollHeight;
+}
+async function sendMsg(groupId){
+  const g = DB.groups.find(x=>x.id===groupId);
+  const u = currentUser();
+  const input = $('#chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  const newMessages = [...(g.messages||[]), { from:u.id, text }];
+  await updateDoc(doc(db,'groups',groupId), { messages:newMessages });
+  input.value='';
+  await loadAllData();
+  openGroup(groupId);
+}
+
+/* =====================================================================
+   FEEDBACK FORMS + QR CODES
+   Chairperson (and Vice Chair for viewing) can create a feedback form;
+   the app generates a scannable QR that opens the public, no-login
+   submission page at ?fb=<formId>.
+===================================================================== */
+function feedbackLink(formId){
+  return location.origin + location.pathname + '?fb=' + formId;
+}
+function renderFeedback(u){
+  const canManage = u.role==='chairperson';
+  const canViewAdmin = u.role==='chairperson' || u.role==='vice_chair';
+  const createBtn = canManage ? `<button class="btn btn-gold" onclick="openCreateFeedbackModal()">+ New feedback form</button>` : '';
+  const cards = DB.feedbackForms.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(f=>{
+    const s = f.sessionId ? DB.sessions.find(x=>x.id===f.sessionId) : null;
+    const count = DB.feedbackResponses.filter(r=>r.formId===f.id).length;
+    return `
+      <div class="card feedback-card" style="margin-bottom:16px;">
+        <h3 style="margin-bottom:2px;">${f.title}</h3>
+        <div class="row-sub">${s ? 'Linked to: '+s.title+' \u00b7 ' : ''}${(f.questions||[]).length} question${(f.questions||[]).length===1?'':'s'} \u00b7 ${count} response${count===1?'':'s'}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm btn-primary" onclick="openPublicFillModal('${f.id}')">\u270D\uFE0F Fill this form</button>
+          ${canViewAdmin ? `<button class="btn btn-sm" onclick="openQrModal('${f.id}')">\uD83D\uDCF2 QR code</button>` : ''}
+          ${canViewAdmin ? `<button class="btn btn-sm" onclick="openFeedbackResponsesModal('${f.id}')">View responses (${count})</button>` : ''}
+          ${canManage ? `<button class="btn btn-sm btn-danger-outline" onclick="deleteFeedbackForm('${f.id}')">Delete</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  return `<div class="page-header">${createBtn}</div>${cards || `<div class="empty">No feedback forms yet.${canManage?' Create one to get started \u2014 you\u2019ll get a shareable QR code instantly.':''}</div>`}`;
+}
+function openCreateFeedbackModal(){
+  const sessionOptions = DB.sessions.map(s=>`<option value="${s.id}">${s.title}</option>`).join('');
+  openModal(`
+    <h3>\uD83D\uDCDD Create feedback form</h3>
+    <div class="form-group"><label>Form title</label><input class="field-input" id="fb-title" placeholder="e.g. Workshop Feedback"/></div>
+    <div class="form-group">
+      <label>Link to a session (optional)</label>
+      <select class="field-input" id="fb-session"><option value="">Not linked</option>${sessionOptions}</select>
+    </div>
+    <div class="form-group">
+      <label>Questions</label>
+      <div class="questions-list" id="fb-questions">
+        <div class="q-item">
+          <input class="field-input" placeholder="Question" style="margin-bottom:0;"/>
+          <select class="field-input" style="max-width:112px;margin-bottom:0;flex:0 0 auto;"><option value="text">Text</option><option value="rating">Rating</option></select>
+          <button onclick="this.parentElement.remove()">\u00d7</button>
+        </div>
+      </div>
+      <button class="link-btn" onclick="addFeedbackQuestionField()">+ Add question</button>
+    </div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="createFeedbackForm()">Create form</button>
+    </div>
+  `);
+}
+function addFeedbackQuestionField(){
+  const wrap = $('#fb-questions');
+  const div = document.createElement('div');
+  div.className='q-item';
+  div.innerHTML = `<input class="field-input" placeholder="Question" style="margin-bottom:0;"/><select class="field-input" style="max-width:112px;margin-bottom:0;flex:0 0 auto;"><option value="text">Text</option><option value="rating">Rating</option></select><button onclick="this.parentElement.remove()">\u00d7</button>`;
+  wrap.appendChild(div);
+}
+async function createFeedbackForm(){
+  const title = $('#fb-title').value.trim();
+  const sessionId = $('#fb-session').value || null;
+  const rows = Array.from($all('#fb-questions .q-item'));
+  const questions = rows.map(r=>{
+    const inputs = r.querySelectorAll('input, select');
+    return { text: inputs[0].value.trim(), type: inputs[1].value };
+  }).filter(q=>q.text);
+  if(!title){ toast('Enter a form title'); return; }
+  if(!questions.length){ toast('Add at least one question'); return; }
+  const id = 'fb'+Date.now();
+  await setDoc(doc(db,'feedbackForms',id), { title, sessionId, questions, createdBy: currentUser().id, createdAt: Date.now() });
+  closeModal();
+  await loadAllData();
+  toast('Feedback form created \u2014 here\u2019s your QR code');
+  navigate('feedback');
+  openQrModal(id);
+}
+async function deleteFeedbackForm(formId){
+  await deleteDoc(doc(db,'feedbackForms',formId));
+  await loadAllData();
+  toast('Feedback form deleted');
+  navigate('feedback');
+}
+function openQrModal(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const link = feedbackLink(formId);
+  openModal(`
+    <h3>\uD83D\uDCF2 QR \u2014 ${f.title}</h3>
+    <div class="qr-box">
+      <div class="qr-canvas-wrap" id="qr-canvas-wrap"></div>
+      <div class="link-box" style="width:100%;"><span>\uD83D\uDD17</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>
+      <div style="font-size:12px;color:var(--text-muted);text-align:center;">Scan this to open the feedback form \u2014 the person will be asked to log in with their @ternaengg.ac.in account first, then the form opens automatically.</div>
+    </div>
+    <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
+  `);
+  const target = $('#qr-canvas-wrap');
+  if(target){
+    target.innerHTML='';
+    if(window.QRCode){
+      new QRCode(target, { text: link, width:180, height:180, colorDark:'#003B5C', colorLight:'#ffffff' });
+    } else {
+      target.innerHTML = `<div class="empty">QR library failed to load \u2014 use the link above instead.</div>`;
+    }
+  }
+}
+/* Sheet-style responses view (like Google Forms' "Responses" tab):
+   one row per person (duplicates can't exist any more — see
+   submitFeedbackInApp), a column per question, download buttons, and a
+   per-question pie/column chart. */
+let _fbChartInstance = null;
+
+function openFeedbackResponsesModal(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const responses = DB.feedbackResponses.filter(r=>r.formId===formId).sort((a,b)=>(b.submittedAt||0)-(a.submittedAt||0));
+  const qs = f.questions||[];
+  const headCells = qs.map(q=>`<th>${q.text}</th>`).join('');
+  const rows = responses.map(r=>{
+    const cells = qs.map((q,i)=>{
+      const a = (r.answers||[])[i];
+      return `<td>${q.type==='rating' ? ('\u2B50'.repeat(Number(a)||0)||'\u2014') : (a||'\u2014')}</td>`;
+    }).join('');
+    return `<tr>
+      <td>${r.submittedByName || '\u2014'}</td>
+      <td>${r.submittedByEmail || '\u2014'}</td>
+      ${cells}
+      <td>${r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '\u2014'}</td>
+    </tr>`;
+  }).join('');
+  const qOptions = qs.map((q,i)=>`<option value="${i}">${q.text}</option>`).join('');
+  openModal(`
+    <h3>Responses \u2014 ${f.title}</h3>
+    <div class="row-sub" style="margin-bottom:10px;">${responses.length} response${responses.length===1?'':'s'} \u00b7 one per person (their latest answer is what\u2019s counted)</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      <button class="btn btn-sm" onclick="downloadFeedbackCSV('${formId}')">\u2B07\uFE0F CSV</button>
+      <button class="btn btn-sm" onclick="downloadFeedbackExcel('${formId}')">\u2B07\uFE0F Excel</button>
+      <button class="btn btn-sm" onclick="downloadFeedbackPDF('${formId}')">\u2B07\uFE0F PDF</button>
+    </div>
+    <div style="overflow-x:auto;margin-bottom:20px;">
+    <table>
+      <tr><th>Name</th><th>Email</th>${headCells}<th>Submitted</th></tr>
+      ${rows || `<tr><td colspan="${qs.length+3}" style="color:var(--text-muted);">No responses yet.</td></tr>`}
+    </table>
+    </div>
+    ${qs.length && responses.length ? `
+    <div class="form-group">
+      <label>Chart a question</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <select class="field-input" id="fb-chart-q" style="max-width:220px;margin-bottom:0;" onchange="renderFeedbackChart('${formId}')">${qOptions}</select>
+        <select class="field-input" id="fb-chart-type" style="max-width:120px;margin-bottom:0;" onchange="renderFeedbackChart('${formId}')">
+          <option value="pie">Pie chart</option>
+          <option value="bar">Column chart</option>
+        </select>
+      </div>
+      <div style="max-width:440px;margin:16px auto 0;"><canvas id="fb-chart-canvas" width="400" height="320"></canvas></div>
+    </div>` : ''}
+    <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
+  `);
+  if(qs.length && responses.length) renderFeedbackChart(formId);
+}
+
+function renderFeedbackChart(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const responses = DB.feedbackResponses.filter(r=>r.formId===formId);
+  const qSel = document.getElementById('fb-chart-q');
+  const tSel = document.getElementById('fb-chart-type');
+  const canvas = document.getElementById('fb-chart-canvas');
+  if(!qSel || !tSel || !canvas || !window.Chart) return;
+  const qi = Number(qSel.value || 0);
+  const type = tSel.value || 'pie';
+  const q = (f.questions||[])[qi];
+  if(!q) return;
+  const counts = {};
+  responses.forEach(r=>{
+    const raw = (r.answers||[])[qi];
+    const label = q.type==='rating'
+      ? (Number(raw) ? (Number(raw)+' \u2605') : 'No answer')
+      : (raw && String(raw).trim() ? String(raw).trim() : 'No answer');
+    counts[label] = (counts[label]||0) + 1;
+  });
+  const labels = Object.keys(counts);
+  const data = Object.values(counts);
+  const palette = ['#00629B','#F2A900','#2E7D32','#C62828','#534AB7','#00838F','#B26A00','#993C1D'];
+  if(_fbChartInstance){ _fbChartInstance.destroy(); _fbChartInstance = null; }
+  _fbChartInstance = new Chart(canvas.getContext('2d'), {
+    type: type==='pie' ? 'pie' : 'bar',
+    data: { labels, datasets: [{ label: q.text, data, backgroundColor: labels.map((_,i)=>palette[i%palette.length]) }] },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: type==='pie', position:'bottom' }, title: { display:true, text:q.text } },
+      scales: type==='pie' ? {} : { y: { beginAtZero:true, ticks:{ precision:0 } } }
+    }
+  });
+}
+
+/* ---- shared: build the same rows for CSV / Excel / PDF export ---- */
+function _feedbackTableData(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const responses = DB.feedbackResponses.filter(r=>r.formId===formId).sort((a,b)=>(b.submittedAt||0)-(a.submittedAt||0));
+  const qs = f.questions||[];
+  const header = ['Name','Email', ...qs.map(q=>q.text), 'Submitted'];
+  const rows = responses.map(r=>{
+    const cells = qs.map((q,i)=>{
+      const a = (r.answers||[])[i];
+      return q.type==='rating' ? (Number(a)||0) : (a||'');
+    });
+    const when = r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+    return [r.submittedByName||'', r.submittedByEmail||'', ...cells, when];
+  });
+  return { title: f.title || 'feedback', header, rows };
+}
+function _downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+function _safeFileName(s){ return String(s).replace(/[^\w\-]+/g,'_').slice(0,60); }
+
+// These downloads are built from whatever is currently loaded from Firestore,
+// as a plain file on the admin's own device \u2014 so once downloaded, the
+// file is independent of Firestore: clearing/resetting the live data later
+// does not touch files that were already downloaded.
+function downloadFeedbackCSV(formId){
+  const { title, header, rows } = _feedbackTableData(formId);
+  const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+  const csv = [header.map(esc).join(','), ...rows.map(r=>r.map(esc).join(','))].join('\r\n');
+  _downloadBlob(new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'}), _safeFileName(title)+'_responses.csv');
+  toast('CSV downloaded');
+}
+function downloadFeedbackExcel(formId){
+  if(!window.XLSX){ toast('Excel export library failed to load'); return; }
+  const { title, header, rows } = _feedbackTableData(formId);
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Responses');
+  XLSX.writeFile(wb, _safeFileName(title)+'_responses.xlsx');
+  toast('Excel file downloaded');
+}
+function downloadFeedbackPDF(formId){
+  if(!window.jspdf){ toast('PDF export library failed to load'); return; }
+  const { title, header, rows } = _feedbackTableData(formId);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: header.length > 5 ? 'landscape' : 'portrait' });
+  pdf.setFontSize(14);
+  pdf.text(title, 14, 16);
+  pdf.autoTable({ head:[header], body: rows, startY: 22, styles:{ fontSize:8 }, headStyles:{ fillColor:[0,59,92] } });
+  pdf.save(_safeFileName(title)+'_responses.pdf');
+  toast('PDF downloaded');
+}
+
+/* ---- shared question-field renderers (in-app fill + public page) ---- */
+function questionFieldHtml(q, i, prefix){
+  if(q.type==='rating'){
+    return `<div class="form-group"><label>${q.text}</label>
+      <div class="stars-row" data-qi="${i}">
+        ${[1,2,3,4,5].map(n=>`<span class="star" data-val="${n}" onclick="setStar(this,${i},'${prefix}')">\u2605</span>`).join('')}
+      </div>
+      <input type="hidden" id="${prefix}-q-${i}" value="0"/>
+    </div>`;
+  }
+  return `<div class="form-group"><label>${q.text}</label><input class="field-input" id="${prefix}-q-${i}"/></div>`;
+}
+function setStar(el, qi, prefix){
+  const val = Number(el.dataset.val);
+  const row = el.parentElement;
+  row.querySelectorAll('.star').forEach(s=>s.classList.toggle('active', Number(s.dataset.val)<=val));
+  $('#'+prefix+'-q-'+qi).value = val;
+}
+function openPublicFillModal(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  openModal(`
+    <h3>${f.title}</h3>
+    <div id="fill-fields">${(f.questions||[]).map((q,i)=>questionFieldHtml(q,i,'fill')).join('')}</div>
+    <div class="modal-close-row">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitFeedbackInApp('${formId}')">Submit feedback</button>
+    </div>
+  `);
+}
+async function submitFeedbackInApp(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const answers = (f.questions||[]).map((q,i)=>{ const el=$('#fill-q-'+i); return el ? el.value.trim() : ''; });
+  const u = currentUser();
+  // Deterministic doc id (formId + user id) instead of a timestamp-based one:
+  // if this person already submitted for this form, this OVERWRITES that
+  // same response doc rather than creating a second one. So each
+  // email/account is counted exactly once per form, and it's always their
+  // latest answers that count.
+  const wasResubmit = DB.feedbackResponses.some(r=>r.formId===formId && r.submittedBy===u.id);
+  const id = 'resp_'+formId+'_'+u.id;
+  await setDoc(doc(db,'feedbackResponses',id), {
+    formId, answers,
+    submittedBy:u.id, submittedByName:u.name||'', submittedByEmail:u.email||'',
+    submittedAt:Date.now()
+  });
+  closeModal();
+  await loadAllData();
+  toast(wasResubmit ? 'Feedback updated \u2014 thanks! \uD83C\uDF89' : 'Thanks for your feedback! \uD83C\uDF89');
+  navigate('feedback');
+}
+
+/* ---- public route: only certificate verification stays no-login.
+   A feedback link (?fb=) is now gated behind login — see
+   pendingFeedbackFormId above and enterApp(). ---- */
+async function initPublicFeedbackRoute(){
+  const params = new URLSearchParams(location.search);
+  const vcode = params.get('verify');
+  if(vcode){ await initPublicVerifyRoute(vcode); return; }
+}
+
+/* ---- public certificate verification page (?verify=<code>) ---- */
+async function initPublicVerifyRoute(code){
+  const wrap = $('#view-public');
+  wrap.style.display='flex';
+  wrap.innerHTML = `<div class="public-card"><div class="empty">Verifying certificate\u2026</div></div>`;
+  try{
+    const snap = await getDoc(doc(db,'certificates',code));
+    if(!snap.exists()){
+      wrap.innerHTML = `<div class="public-card"><div class="public-brand"><div class="mark">TE</div><div><strong>IEEE-TEC Portal</strong></div></div><div class="empty">\u274C No certificate found for this code. It may be invalid or revoked.</div></div>`;
+      return;
+    }
+    const cert = { id: snap.id, ...snap.data() };
+    wrap.innerHTML = `
+      <div class="public-card" style="width:760px;max-width:96vw;">
+        <div class="public-brand"><div class="mark">TE</div><div><div style="font-weight:800;">IEEE-TEC Portal</div><div style="font-size:12px;color:var(--text-muted);">Certificate verification</div></div></div>
+        ${cert.name ? `
+          <div class="cert-scale-wrap"><div class="cert-card" id="cert-card-${cert.id}">${certificateInnerHtml(cert, cert.name)}</div></div>
+          <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="downloadCertificate('${cert.id}')">\u2B07\uFE0F Download certificate</button>
+        ` : `<div class="empty">This certificate hasn\u2019t been claimed by its recipient yet.</div>`}
+      </div>`;
+    if(cert.name) setTimeout(()=>renderCertQr(cert.id), 80);
+  }catch(e){
+    console.error(e);
+    wrap.innerHTML = `<div class="public-card"><div class="empty">Couldn\u2019t verify this certificate. Please try again.</div></div>`;
+  }
+}
+
+/* =====================================================================
+   PROFILE
+===================================================================== */
+function renderProfile(u){
+  const team = u.teamId ? teamById(u.teamId) : null;
+  const registered = DB.sessions.filter(s=>(s.registrations||[]).some(r=>r.studentId===u.id));
+  const myCerts = DB.certificates.filter(c=>c.studentId===u.id).sort((a,b)=>(b.issuedAt||0)-(a.issuedAt||0));
+  return `
+    <div class="card profile-hero" style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="avatar-sm" style="width:56px;height:56px;font-size:19px;">${initials(u.name)}</div>
+        <div>
+          <div style="font-size:17px;font-weight:700;">${u.name}</div>
+          <div class="row-sub">${u.email} \u00b7 ${u.tuId}</div>
+          <span class="role-badge" style="margin-top:6px;">${roleLabel(u.role)}${u.status==='pending' ? ' \u00b7 pending' : ''}</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card"><div class="stat">${u.points||0}</div><div class="stat-label">Credit points</div></div>
+      <div class="card"><div class="stat">${team ? team.name : '\u2014'}</div><div class="stat-label">Team</div></div>
+      <div class="card"><div class="stat">${registered.length}</div><div class="stat-label">Sessions registered</div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <h3>My registered sessions</h3>
+      ${registered.length ? registered.map(s=>{
+        const r = s.registrations.find(x=>x.studentId===u.id);
+        return `<div class="list-row">
+          <div><div class="row-name">${s.title}</div><div class="row-sub">${formatDate(s.date)}</div></div>
+          <span class="badge ${r.attended?'badge-confirmed':'badge-pending'}">${r.attended?'Attended':'Registered'}</span>
+        </div>`;
+      }).join('') : '<div class="empty">No sessions registered yet.</div>'}
+    </div>
+    <div class="card">
+      <h3>\uD83C\uDF93 My e-certificates</h3>
+      ${myCerts.length ? myCerts.map(c=>`
+        <div class="list-row">
+          <div><div class="row-name">${c.sessionTitle}</div><div class="row-sub">${c.sessionDate?formatDate(c.sessionDate):''}</div></div>
+          <button class="btn btn-sm btn-gold" onclick="openCertificateModal('${c.id}')">${c.name ? 'View / download' : 'Enter name & generate'}</button>
+        </div>`).join('') : '<div class="empty">Certificates appear here once your attendance is marked for a session.</div>'}
+    </div>
+  `;
+}
+
+/* =====================================================================
+   MODAL HELPERS
+===================================================================== */
+function openModal(html){
+  $('#modal-body').innerHTML = html;
+  $('#modal-overlay').classList.add('show');
+}
+function closeModal(){
+  $('#modal-overlay').classList.remove('show');
+}
+$('#modal-overlay').addEventListener('click', (e)=>{
+  if(e.target.id==='modal-overlay') closeModal();
+});
+
+/* =====================================================================
+   EXPOSE HANDLERS TO WINDOW
+   The <script> above is a module, so top-level functions are module-scoped
+   and NOT visible to inline onclick="..." / onchange="..." attributes in
+   the HTML unless explicitly attached to window.
+===================================================================== */
+Object.assign(window, {
+  openPicker,
+  switchAuthTab, loginWithPassword, signupWithPassword,
+  selectRole, completeSignup, cancelGoogleSignup,
+  navigate, logout,
+  openAssignModal, openCreateTeamModal, createTeam,
+  openEditTeamModal, saveTeamSize, confirmPosition, rejectPosition,
+  enrollTeam, approveJoin, rejectJoin,
+  openCreateSessionModal, addQuestionField, createSession,
+  copyLink, deleteSession, registerSession, submitRegistration, viewRegistrations,
+  openGroup, sendMsg,
+  closeModal,
+  openDrawer, closeDrawer, toggleBell, markAllRead,
+  openCreateFeedbackModal, addFeedbackQuestionField, createFeedbackForm, deleteFeedbackForm,
+  openQrModal, openFeedbackResponsesModal, openPublicFillModal, submitFeedbackInApp,
+  setStar,
+  downloadFeedbackCSV, downloadFeedbackExcel, downloadFeedbackPDF, renderFeedbackChart,
+  openSessionQrModal, openEditEnrollModal, saveEnrollDeadline, clearEnrollDeadline,
+  markAttendance, toggleAttendancePermission,
+  openCertificateModal, saveCertificateName, downloadCertificate
+});
+
+/* Restore session on page reload / re-visit, using real Firebase Auth state.
+   This is the ONLY place that calls handleAuthUser — openPicker and
+   loginWithPassword deliberately don't call it too, to avoid the race
+   that used to show the wrong screen. signupWithPassword sets
+   session._suppressAuthListener while it creates the Firestore profile
+   itself, so this listener steps aside during that window. */
+onAuthStateChanged(auth, (fbUser) => {
+  if(session._suppressAuthListener) return;
+  if (fbUser) {
+    handleAuthUser(fbUser);
+  }
+});
+
+/* Certificate-verification public route (still no login required). */
+initPublicFeedbackRoute();
+</script>
+</body>
+</html>
