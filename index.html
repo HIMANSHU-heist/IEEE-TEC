@@ -2079,93 +2079,207 @@ function openQrModal(formId){
     }
   }
 }
-/* Sheet-style responses view (like Google Forms' "Responses" tab):
-   one row per person (duplicates can't exist any more — see
-   submitFeedbackInApp), a column per question, download buttons, and a
-   per-question pie/column chart. */
-let _fbChartInstance = null;
+/* Google-Forms-style responses view: a "Summary" tab that auto-generates a
+   chart + percentage breakdown for every question (no manual "pick a
+   question" step — it just computes fresh from current data, every time
+   this modal opens), and an "Individual responses" tab with the full sheet
+   plus CSV/Excel/PDF export. */
+let _fbChartInstances = [];
+function _destroyFbCharts(){
+  _fbChartInstances.forEach(c=>{ try{ c.destroy(); }catch(e){} });
+  _fbChartInstances = [];
+}
+const FB_PALETTE = ['#00629B','#F2A900','#2E7D32','#C62828','#534AB7','#00838F','#B26A00','#993C1D','#AD1457','#3949AB'];
+function _fbPct(n, total){ return total ? Math.round((n/total)*1000)/10 : 0; }
+
+// Older responses (saved before this update) don't have submittedByName /
+// submittedByEmail stored on them directly \u2014 only submittedBy (the user
+// id). So for those, look the person up from DB.users instead of showing
+// blanks. Anonymous responses from the old no-login QR flow (no submittedBy
+// at all) will still show as \u2014 / \u2014, since there's no identity to recover.
+function _responderInfo(r){
+  if(r.submittedByName || r.submittedByEmail){
+    return { name: r.submittedByName||'\u2014', email: r.submittedByEmail||'\u2014' };
+  }
+  const u = r.submittedBy ? userById(r.submittedBy) : null;
+  return { name: u ? u.name : '\u2014', email: u ? u.email : '\u2014' };
+}
 
 function openFeedbackResponsesModal(formId){
   const f = DB.feedbackForms.find(x=>x.id===formId);
-  const responses = DB.feedbackResponses.filter(r=>r.formId===formId).sort((a,b)=>(b.submittedAt||0)-(a.submittedAt||0));
-  const qs = f.questions||[];
-  const headCells = qs.map(q=>`<th>${q.text}</th>`).join('');
-  const rows = responses.map(r=>{
-    const cells = qs.map((q,i)=>{
-      const a = (r.answers||[])[i];
-      return `<td>${q.type==='rating' ? ('\u2B50'.repeat(Number(a)||0)||'\u2014') : (a||'\u2014')}</td>`;
-    }).join('');
-    return `<tr>
-      <td>${r.submittedByName || '\u2014'}</td>
-      <td>${r.submittedByEmail || '\u2014'}</td>
-      ${cells}
-      <td>${r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '\u2014'}</td>
-    </tr>`;
-  }).join('');
-  const qOptions = qs.map((q,i)=>`<option value="${i}">${q.text}</option>`).join('');
+  const responses = DB.feedbackResponses.filter(r=>r.formId===formId);
   openModal(`
     <h3>Responses \u2014 ${f.title}</h3>
-    <div class="row-sub" style="margin-bottom:10px;">${responses.length} response${responses.length===1?'':'s'} \u00b7 one per person (their latest answer is what\u2019s counted)</div>
+    <div class="row-sub" style="margin-bottom:12px;">${responses.length} response${responses.length===1?'':'s'} \u00b7 one per person (their latest answer is what\u2019s counted)</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
       <button class="btn btn-sm" onclick="downloadFeedbackCSV('${formId}')">\u2B07\uFE0F CSV</button>
       <button class="btn btn-sm" onclick="downloadFeedbackExcel('${formId}')">\u2B07\uFE0F Excel</button>
       <button class="btn btn-sm" onclick="downloadFeedbackPDF('${formId}')">\u2B07\uFE0F PDF</button>
     </div>
-    <div style="overflow-x:auto;margin-bottom:20px;">
+    <div class="auth-tabs" style="margin-bottom:16px;">
+      <button class="auth-tab active" id="fb-tab-summary" onclick="switchFeedbackTab('summary')">\uD83D\uDCCA Summary</button>
+      <button class="auth-tab" id="fb-tab-individual" onclick="switchFeedbackTab('individual')">\uD83D\uDCCB Individual responses</button>
+    </div>
+    <div id="fb-summary-wrap"></div>
+    <div id="fb-individual-wrap" style="display:none;"></div>
+    <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
+  `);
+  // Both tabs are built right away (not just on click) so switching between
+  // them is instant, and so the charts are already correct the first time
+  // this modal opens \u2014 nothing needs a manual "generate" click.
+  renderFeedbackSummary(formId);
+  renderFeedbackIndividual(formId);
+}
+function switchFeedbackTab(tab){
+  $('#fb-tab-summary').classList.toggle('active', tab==='summary');
+  $('#fb-tab-individual').classList.toggle('active', tab==='individual');
+  $('#fb-summary-wrap').style.display = tab==='summary' ? 'block' : 'none';
+  $('#fb-individual-wrap').style.display = tab==='individual' ? 'block' : 'none';
+}
+
+/* ---- Summary tab: one auto-generated chart + % legend per question ---- */
+function _fbLegendRow(label, count, total, color){
+  const pct = _fbPct(count, total);
+  return `
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:4px;">
+        <span style="display:flex;align-items:center;gap:6px;min-width:0;">
+          <span style="width:10px;height:10px;border-radius:50%;background:${color};flex:0 0 auto;display:inline-block;"></span>
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
+        </span>
+        <span style="color:var(--text-muted);flex:0 0 auto;">${count} \u00b7 ${pct}%</span>
+      </div>
+      <div style="background:var(--blue-light);border-radius:6px;height:8px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${color};"></div>
+      </div>
+    </div>`;
+}
+function _fbQuestionSummary(f, qi, responses){
+  const q = f.questions[qi];
+  const canvasId = 'fb-chart-'+qi;
+  const answers = responses.map(r=>(r.answers||[])[qi]);
+
+  if(q.type==='rating'){
+    const counts = {1:0,2:0,3:0,4:0,5:0};
+    answers.forEach(a=>{ const n=Number(a); if(n>=1&&n<=5) counts[n]=(counts[n]||0)+1; });
+    const total = counts[1]+counts[2]+counts[3]+counts[4]+counts[5];
+    const avg = total ? (( counts[1]*1+counts[2]*2+counts[3]*3+counts[4]*4+counts[5]*5)/total).toFixed(2) : '\u2014';
+    const order = [5,4,3,2,1];
+    const legend = order.map((n,i)=>_fbLegendRow('\u2605'.repeat(n)+' ('+n+')', counts[n], total, FB_PALETTE[i])).join('');
+    const html = `
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+          <h4 style="font-size:14px;">${q.text}</h4>
+          <span class="row-sub">${total} response${total===1?'':'s'} \u00b7 avg ${avg} \u2605</span>
+        </div>
+        <div style="display:flex;gap:22px;flex-wrap:wrap;align-items:center;">
+          <div style="width:170px;height:170px;flex:0 0 auto;"><canvas id="${canvasId}"></canvas></div>
+          <div style="flex:1;min-width:200px;">${legend || '<div class="empty">No responses yet.</div>'}</div>
+        </div>
+      </div>`;
+    return { html, draw: total ? ()=>_fbDrawPie(canvasId, order.map(n=>n+'\u2605'), order.map(n=>counts[n])) : null };
+  }
+
+  // text-type question: treat as categorical (pie + %) if there aren't too
+  // many distinct answers, otherwise fall back to a plain answer list \u2014
+  // exactly how Google Forms handles "Short answer" / "Paragraph" questions.
+  const tally = {};
+  let answered = 0;
+  answers.forEach(a=>{
+    const v = (a!==undefined && a!==null && String(a).trim()!=='') ? String(a).trim() : null;
+    if(v){ tally[v]=(tally[v]||0)+1; answered++; }
+  });
+  const distinct = Object.keys(tally).sort((a,b)=>tally[b]-tally[a]);
+
+  if(distinct.length && distinct.length<=6){
+    const legend = distinct.map((l,i)=>_fbLegendRow(l, tally[l], answered, FB_PALETTE[i%FB_PALETTE.length])).join('');
+    const html = `
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+          <h4 style="font-size:14px;">${q.text}</h4>
+          <span class="row-sub">${answered} response${answered===1?'':'s'}</span>
+        </div>
+        <div style="display:flex;gap:22px;flex-wrap:wrap;align-items:center;">
+          <div style="width:170px;height:170px;flex:0 0 auto;"><canvas id="${canvasId}"></canvas></div>
+          <div style="flex:1;min-width:200px;">${legend}</div>
+        </div>
+      </div>`;
+    return { html, draw: ()=>_fbDrawPie(canvasId, distinct, distinct.map(l=>tally[l])) };
+  }
+
+  const listItems = answers
+    .filter(a=>a!==undefined && a!==null && String(a).trim()!=='')
+    .map(a=>`<div style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:13px;">${a}</div>`)
+    .join('');
+  return {
+    html: `
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+          <h4 style="font-size:14px;">${q.text}</h4>
+          <span class="row-sub">${answered} response${answered===1?'':'s'} \u00b7 too many distinct answers to chart</span>
+        </div>
+        <div style="max-height:220px;overflow-y:auto;">${listItems || '<div class="empty">No answers yet.</div>'}</div>
+      </div>`,
+    draw: null
+  };
+}
+function _fbDrawPie(canvasId, labels, data){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas || !window.Chart) return;
+  const chart = new Chart(canvas.getContext('2d'), {
+    type: 'pie',
+    data: { labels, datasets: [{ data, backgroundColor: labels.map((_,i)=>FB_PALETTE[i%FB_PALETTE.length]) }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ callbacks:{
+      label: (ctx)=>{
+        const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+        return `${ctx.label}: ${ctx.raw} (${_fbPct(ctx.raw,total)}%)`;
+      }
+    } } } }
+  });
+  _fbChartInstances.push(chart);
+}
+function renderFeedbackSummary(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const responses = DB.feedbackResponses.filter(r=>r.formId===formId);
+  const wrap = document.getElementById('fb-summary-wrap');
+  if(!wrap) return;
+  _destroyFbCharts();
+  const qs = f.questions||[];
+  if(!qs.length){ wrap.innerHTML = '<div class="empty">This form has no questions.</div>'; return; }
+  if(!responses.length){ wrap.innerHTML = '<div class="empty">No responses yet \u2014 charts will appear here automatically as soon as people respond, no need to generate anything.</div>'; return; }
+  const parts = qs.map((q,qi)=>_fbQuestionSummary(f, qi, responses));
+  wrap.innerHTML = parts.map(p=>p.html).join('');
+  parts.forEach(p=>{ if(p.draw) p.draw(); });
+}
+
+/* ---- Individual responses tab: the full sheet, one row per person ---- */
+function renderFeedbackIndividual(formId){
+  const f = DB.feedbackForms.find(x=>x.id===formId);
+  const responses = DB.feedbackResponses.filter(r=>r.formId===formId).sort((a,b)=>(b.submittedAt||0)-(a.submittedAt||0));
+  const qs = f.questions||[];
+  const headCells = qs.map(q=>`<th>${q.text}</th>`).join('');
+  const rows = responses.map(r=>{
+    const who = _responderInfo(r);
+    const cells = qs.map((q,i)=>{
+      const a = (r.answers||[])[i];
+      return `<td>${q.type==='rating' ? ('\u2B50'.repeat(Number(a)||0)||'\u2014') : (a||'\u2014')}</td>`;
+    }).join('');
+    return `<tr>
+      <td>${who.name}</td>
+      <td>${who.email}</td>
+      ${cells}
+      <td>${r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '\u2014'}</td>
+    </tr>`;
+  }).join('');
+  const wrap = document.getElementById('fb-individual-wrap');
+  if(!wrap) return;
+  wrap.innerHTML = `
+    <div style="overflow-x:auto;">
     <table>
       <tr><th>Name</th><th>Email</th>${headCells}<th>Submitted</th></tr>
       ${rows || `<tr><td colspan="${qs.length+3}" style="color:var(--text-muted);">No responses yet.</td></tr>`}
     </table>
-    </div>
-    ${qs.length && responses.length ? `
-    <div class="form-group">
-      <label>Chart a question</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <select class="field-input" id="fb-chart-q" style="max-width:220px;margin-bottom:0;" onchange="renderFeedbackChart('${formId}')">${qOptions}</select>
-        <select class="field-input" id="fb-chart-type" style="max-width:120px;margin-bottom:0;" onchange="renderFeedbackChart('${formId}')">
-          <option value="pie">Pie chart</option>
-          <option value="bar">Column chart</option>
-        </select>
-      </div>
-      <div style="max-width:440px;margin:16px auto 0;"><canvas id="fb-chart-canvas" width="400" height="320"></canvas></div>
-    </div>` : ''}
-    <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
-  `);
-  if(qs.length && responses.length) renderFeedbackChart(formId);
-}
-
-function renderFeedbackChart(formId){
-  const f = DB.feedbackForms.find(x=>x.id===formId);
-  const responses = DB.feedbackResponses.filter(r=>r.formId===formId);
-  const qSel = document.getElementById('fb-chart-q');
-  const tSel = document.getElementById('fb-chart-type');
-  const canvas = document.getElementById('fb-chart-canvas');
-  if(!qSel || !tSel || !canvas || !window.Chart) return;
-  const qi = Number(qSel.value || 0);
-  const type = tSel.value || 'pie';
-  const q = (f.questions||[])[qi];
-  if(!q) return;
-  const counts = {};
-  responses.forEach(r=>{
-    const raw = (r.answers||[])[qi];
-    const label = q.type==='rating'
-      ? (Number(raw) ? (Number(raw)+' \u2605') : 'No answer')
-      : (raw && String(raw).trim() ? String(raw).trim() : 'No answer');
-    counts[label] = (counts[label]||0) + 1;
-  });
-  const labels = Object.keys(counts);
-  const data = Object.values(counts);
-  const palette = ['#00629B','#F2A900','#2E7D32','#C62828','#534AB7','#00838F','#B26A00','#993C1D'];
-  if(_fbChartInstance){ _fbChartInstance.destroy(); _fbChartInstance = null; }
-  _fbChartInstance = new Chart(canvas.getContext('2d'), {
-    type: type==='pie' ? 'pie' : 'bar',
-    data: { labels, datasets: [{ label: q.text, data, backgroundColor: labels.map((_,i)=>palette[i%palette.length]) }] },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: type==='pie', position:'bottom' }, title: { display:true, text:q.text } },
-      scales: type==='pie' ? {} : { y: { beginAtZero:true, ticks:{ precision:0 } } }
-    }
-  });
+    </div>`;
 }
 
 /* ---- shared: build the same rows for CSV / Excel / PDF export ---- */
@@ -2175,12 +2289,13 @@ function _feedbackTableData(formId){
   const qs = f.questions||[];
   const header = ['Name','Email', ...qs.map(q=>q.text), 'Submitted'];
   const rows = responses.map(r=>{
+    const who = _responderInfo(r);
     const cells = qs.map((q,i)=>{
       const a = (r.answers||[])[i];
       return q.type==='rating' ? (Number(a)||0) : (a||'');
     });
     const when = r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
-    return [r.submittedByName||'', r.submittedByEmail||'', ...cells, when];
+    return [who.name==='\u2014'?'':who.name, who.email==='\u2014'?'':who.email, ...cells, when];
   });
   return { title: f.title || 'feedback', header, rows };
 }
@@ -2392,7 +2507,7 @@ Object.assign(window, {
   openCreateFeedbackModal, addFeedbackQuestionField, createFeedbackForm, deleteFeedbackForm,
   openQrModal, openFeedbackResponsesModal, openPublicFillModal, submitFeedbackInApp,
   setStar,
-  downloadFeedbackCSV, downloadFeedbackExcel, downloadFeedbackPDF, renderFeedbackChart,
+  downloadFeedbackCSV, downloadFeedbackExcel, downloadFeedbackPDF, switchFeedbackTab,
   openSessionQrModal, openEditEnrollModal, saveEnrollDeadline, clearEnrollDeadline,
   markAttendance, toggleAttendancePermission,
   openCertificateModal, saveCertificateName, downloadCertificate
