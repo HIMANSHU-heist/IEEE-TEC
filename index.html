@@ -2084,11 +2084,6 @@ function openQrModal(formId){
    question" step — it just computes fresh from current data, every time
    this modal opens), and an "Individual responses" tab with the full sheet
    plus CSV/Excel/PDF export. */
-let _fbChartInstances = [];
-function _destroyFbCharts(){
-  _fbChartInstances.forEach(c=>{ try{ c.destroy(); }catch(e){} });
-  _fbChartInstances = [];
-}
 const FB_PALETTE = ['#00629B','#F2A900','#2E7D32','#C62828','#534AB7','#00838F','#B26A00','#993C1D','#AD1457','#3949AB'];
 function _fbPct(n, total){ return total ? Math.round((n/total)*1000)/10 : 0; }
 
@@ -2154,9 +2149,28 @@ function _fbLegendRow(label, count, total, color){
       </div>
     </div>`;
 }
+// Pure-CSS pie: a circular div painted with a conic-gradient. No canvas, no
+// chart library, no draw-after-paint timing \u2014 it's just a background
+// image, so it's correct the instant the HTML string is inserted, even
+// inside a modal that was display:none a moment ago.
+function _fbPieCircleHtml(data, palette, size){
+  size = size || 170;
+  const total = data.reduce((a,b)=>a+b,0);
+  if(!total){
+    return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:var(--blue-light);border:1px solid var(--border);flex:0 0 auto;"></div>`;
+  }
+  let cum = 0;
+  const stops = data.map((v,i)=>{
+    const start = (cum/total*360);
+    cum += v;
+    const end = (cum/total*360);
+    const color = palette[i%palette.length];
+    return `${color} ${start.toFixed(2)}deg ${end.toFixed(2)}deg`;
+  }).join(', ');
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:conic-gradient(${stops});box-shadow:inset 0 0 0 1px var(--border);flex:0 0 auto;"></div>`;
+}
 function _fbQuestionSummary(f, qi, responses){
   const q = f.questions[qi];
-  const canvasId = 'fb-chart-'+qi;
   const answers = responses.map(r=>(r.answers||[])[qi]);
 
   if(q.type==='rating'){
@@ -2166,6 +2180,7 @@ function _fbQuestionSummary(f, qi, responses){
     const avg = total ? (( counts[1]*1+counts[2]*2+counts[3]*3+counts[4]*4+counts[5]*5)/total).toFixed(2) : '\u2014';
     const order = [5,4,3,2,1];
     const legend = order.map((n,i)=>_fbLegendRow('\u2605'.repeat(n)+' ('+n+')', counts[n], total, FB_PALETTE[i])).join('');
+    const pie = _fbPieCircleHtml(order.map(n=>counts[n]), FB_PALETTE);
     const html = `
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
@@ -2173,11 +2188,11 @@ function _fbQuestionSummary(f, qi, responses){
           <span class="row-sub">${total} response${total===1?'':'s'} \u00b7 avg ${avg} \u2605</span>
         </div>
         <div style="display:flex;gap:22px;flex-wrap:wrap;align-items:center;">
-          <div style="width:170px;height:170px;flex:0 0 auto;"><canvas id="${canvasId}"></canvas></div>
+          ${pie}
           <div style="flex:1;min-width:200px;">${legend || '<div class="empty">No responses yet.</div>'}</div>
         </div>
       </div>`;
-    return { html, draw: total ? ()=>_fbDrawPie(canvasId, order.map(n=>n+'\u2605'), order.map(n=>counts[n])) : null };
+    return { html, draw: null };
   }
 
   // text-type question: treat as categorical (pie + %) if there aren't too
@@ -2193,6 +2208,7 @@ function _fbQuestionSummary(f, qi, responses){
 
   if(distinct.length && distinct.length<=6){
     const legend = distinct.map((l,i)=>_fbLegendRow(l, tally[l], answered, FB_PALETTE[i%FB_PALETTE.length])).join('');
+    const pie = _fbPieCircleHtml(distinct.map(l=>tally[l]), FB_PALETTE);
     const html = `
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
@@ -2200,11 +2216,11 @@ function _fbQuestionSummary(f, qi, responses){
           <span class="row-sub">${answered} response${answered===1?'':'s'}</span>
         </div>
         <div style="display:flex;gap:22px;flex-wrap:wrap;align-items:center;">
-          <div style="width:170px;height:170px;flex:0 0 auto;"><canvas id="${canvasId}"></canvas></div>
+          ${pie}
           <div style="flex:1;min-width:200px;">${legend}</div>
         </div>
       </div>`;
-    return { html, draw: ()=>_fbDrawPie(canvasId, distinct, distinct.map(l=>tally[l])) };
+    return { html, draw: null };
   }
 
   const listItems = answers
@@ -2223,33 +2239,16 @@ function _fbQuestionSummary(f, qi, responses){
     draw: null
   };
 }
-function _fbDrawPie(canvasId, labels, data){
-  const canvas = document.getElementById(canvasId);
-  if(!canvas || !window.Chart) return;
-  const chart = new Chart(canvas.getContext('2d'), {
-    type: 'pie',
-    data: { labels, datasets: [{ data, backgroundColor: labels.map((_,i)=>FB_PALETTE[i%FB_PALETTE.length]) }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ callbacks:{
-      label: (ctx)=>{
-        const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
-        return `${ctx.label}: ${ctx.raw} (${_fbPct(ctx.raw,total)}%)`;
-      }
-    } } } }
-  });
-  _fbChartInstances.push(chart);
-}
 function renderFeedbackSummary(formId){
   const f = DB.feedbackForms.find(x=>x.id===formId);
   const responses = DB.feedbackResponses.filter(r=>r.formId===formId);
   const wrap = document.getElementById('fb-summary-wrap');
   if(!wrap) return;
-  _destroyFbCharts();
   const qs = f.questions||[];
   if(!qs.length){ wrap.innerHTML = '<div class="empty">This form has no questions.</div>'; return; }
   if(!responses.length){ wrap.innerHTML = '<div class="empty">No responses yet \u2014 charts will appear here automatically as soon as people respond, no need to generate anything.</div>'; return; }
   const parts = qs.map((q,qi)=>_fbQuestionSummary(f, qi, responses));
   wrap.innerHTML = parts.map(p=>p.html).join('');
-  parts.forEach(p=>{ if(p.draw) p.draw(); });
 }
 
 /* ---- Individual responses tab: the full sheet, one row per person ---- */
