@@ -358,7 +358,7 @@
     mask-image:radial-gradient(circle at 50% 40%, black 0%, transparent 72%);
   }
   .landing::after{
-    content:'\26A1 IEEE \00B7 TERNA ENGINEERING COLLEGE \00B7 STUDENT BRANCH \26A1';
+    content:'⚡ IEEE · TERNA ENGINEERING COLLEGE · STUDENT BRANCH ⚡';
     position:absolute; left:0; right:0; bottom:18px; text-align:center;
     font-size:10.5px; letter-spacing:2px; color:rgba(255,255,255,0.28); font-weight:700;
     pointer-events:none;
@@ -371,7 +371,7 @@
     position:relative;
   }
   .brand-mark::after{
-    content:'\26A1'; position:absolute; right:-6px; bottom:-6px; font-size:14px;
+    content:'⚡'; position:absolute; right:-6px; bottom:-6px; font-size:14px;
     background:var(--gold); color:var(--navy); width:20px;height:20px;border-radius:50%;
     display:flex;align-items:center;justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.25);
   }
@@ -407,7 +407,9 @@
   .bell-btn{
     width:38px;height:38px;border-radius:10px;border:1px solid var(--border);
     background:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;position:relative;
+    line-height:1;
   }
+  .bell-btn .bell-emoji{ font-size:17px; line-height:1; }
   .bell-dot{
     position:absolute; top:5px; right:6px; width:9px;height:9px;border-radius:50%;
     background:var(--danger); border:2px solid #fff; display:none;
@@ -445,7 +447,7 @@
   .drawer .brand .mark{ width:32px;height:32px;border-radius:9px;background:var(--gold); color:var(--navy); font-weight:800; font-size:13px; display:flex;align-items:center;justify-content:center; }
   .drawer .brand .t1{ font-size:14px; font-weight:700; }
   .drawer .brand .t2{ font-size:11px; color:#9FC1D6; }
-  .drawer-close{ margin-left:auto; background:none; border:none; color:#fff; font-size:20px; opacity:.8; }
+  .drawer-close{ margin-left:auto; background:none; border:none; color:#fff; font-size:20px; opacity:.8; line-height:1; }
   .drawer .nav-item{ color:#CFE1EC; }
   .drawer .nav-item:hover{ background:rgba(255,255,255,0.08); }
   .drawer .nav-item.active{ background:rgba(255,255,255,0.16); color:#fff; }
@@ -460,7 +462,7 @@
   .qr-canvas-wrap{ background:#fff; padding:14px; border-radius:14px; border:1px solid var(--border); box-shadow:0 6px 18px rgba(0,20,40,0.1); }
   .feedback-card{ position:relative; overflow:hidden; }
   .feedback-card::before{
-    content:'\1F4DD'; position:absolute; right:-6px; top:-10px; font-size:64px; opacity:0.05;
+    content:'📝'; position:absolute; right:-6px; top:-10px; font-size:64px; opacity:0.05;
   }
   .stars-row{ display:flex; gap:6px; font-size:22px; }
   .star{ cursor:pointer; color:#D9DEE2; transition:color .1s, transform .1s; }
@@ -703,13 +705,13 @@
   <div class="main">
     <div class="topbar">
       <div class="topbar-left">
-        <button class="hamburger-btn" onclick="openDrawer()" type="button" aria-label="Menu">\u2630</button>
+        <button class="hamburger-btn" onclick="openDrawer()" type="button" aria-label="Menu">☰</button>
         <h2 id="page-title">Home</h2>
       </div>
       <div class="topbar-right">
         <div class="bell-wrap">
           <button class="bell-btn" onclick="toggleBell()" type="button" aria-label="Notifications">
-            \uD83D\uDD14<span class="bell-dot" id="bell-dot"></span>
+            <span class="bell-emoji">🔔</span><span class="bell-dot" id="bell-dot"></span>
           </button>
           <div class="bell-panel" id="bell-panel">
             <div class="bell-panel-head">
@@ -736,7 +738,7 @@
   <div class="brand">
     <div class="mark">TE</div>
     <div><div class="t1">IEEE-TEC</div><div class="t2">Club Portal</div></div>
-    <button class="drawer-close" onclick="closeDrawer()" type="button" aria-label="Close menu">\u2715</button>
+    <button class="drawer-close" onclick="closeDrawer()" type="button" aria-label="Close menu">✕</button>
   </div>
   <div id="drawer-nav-items"></div>
   <div class="drawer-foot">
@@ -817,7 +819,7 @@ function userById(id){ return DB.users.find(u=>u.id===id); }
 function teamById(id){ return DB.teams.find(t=>t.id===id); }
 function formatDate(d){
   const dt = new Date(d);
-  return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short'}) + ' \u00b7 ' + dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short'}) + ' · ' + dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 }
 function sessionBadge(s){
   const isPast = new Date(s.date) < new Date();
@@ -885,7 +887,7 @@ async function ensureLeadershipGroupHasMember(uid){
 ===================================================================== */
 async function pushNotification(userId, text, emoji){
   const target = userById(userId);
-  const notif = { id:'n'+Date.now()+Math.floor(Math.random()*1000), text, emoji: emoji||'\uD83D\uDD14', read:false, ts:Date.now() };
+  const notif = { id:'n'+Date.now()+Math.floor(Math.random()*1000), text, emoji: emoji||'🔔', read:false, ts:Date.now() };
   const existing = (target && target.notifications) || [];
   await updateDoc(doc(db,'users',userId), { notifications:[...existing, notif] });
 }
@@ -900,7 +902,7 @@ function renderBell(){
   if(listEl){
     listEl.innerHTML = list.length ? list.map(n=>`
       <div class="bell-item ${n.read?'':'unread'}">
-        <div class="bt">${n.emoji||'\uD83D\uDD14'} ${n.text}</div>
+        <div class="bt">${n.emoji||'🔔'} ${n.text}</div>
         <div class="bs">${new Date(n.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
       </div>`).join('') : `<div class="empty" style="padding:20px;">No notifications yet.</div>`;
   }
@@ -1124,12 +1126,12 @@ async function completeSignup(){
    APP SHELL / NAV
 ===================================================================== */
 const NAV_CONFIG = [
-  { id:'home', label:'Home', icon:'\uD83C\uDFE0' },
-  { id:'teams', label:'Teams', icon:'\uD83D\uDC65' },
-  { id:'sessions', label:'Sessions', icon:'\uD83C\uDFA4' },
-  { id:'groups', label:'Groups', icon:'\uD83D\uDCAC' },
-  { id:'feedback', label:'Feedback', icon:'\uD83D\uDCDD' },
-  { id:'profile', label:'Profile', icon:'\uD83D\uDC64' },
+  { id:'home', label:'Home', icon:'🏠' },
+  { id:'teams', label:'Teams', icon:'👥' },
+  { id:'sessions', label:'Sessions', icon:'🎤' },
+  { id:'groups', label:'Groups', icon:'💬' },
+  { id:'feedback', label:'Feedback', icon:'📝' },
+  { id:'profile', label:'Profile', icon:'👤' },
 ];
 function roleLabel(role){
   return { chairperson:'Chairperson', vice_chair:'Vice Chairperson', team_head:'Team Head', student:'Student', participant:'Participant' }[role] || role;
@@ -1230,7 +1232,7 @@ function renderHome(u){
             <div class="list-row">
               <div class="row-left">
                 <div class="avatar-sm" style="background:${avatarColor(p.id)}20;color:${avatarColor(p.id)};">${initials(p.name)}</div>
-                <div><div class="row-name">${p.name}</div><div class="row-sub">${roleLabel(p.role)} \u00b7 ${p.tuId}</div></div>
+                <div><div class="row-name">${p.name}</div><div class="row-sub">${roleLabel(p.role)} · ${p.tuId}</div></div>
               </div>
               <button class="btn btn-sm btn-primary" onclick="openAssignModal('${p.id}')">Review</button>
             </div>`).join('') : `<div class="empty">No pending requests right now.</div>`}
@@ -1248,7 +1250,7 @@ function renderHome(u){
   let headBanner = '';
   if(u.role==='team_head' && u.teamId){
     const t = teamById(u.teamId);
-    if(t) headBanner = `<div class="assign-banner"><span class="emoji">\uD83C\uDF89</span><span>You're the <strong>Head</strong> of <strong>${t.name}</strong> \u2014 ${t.memberIds.length}/${t.maxSize} members on board.</span></div>`;
+    if(t) headBanner = `<div class="assign-banner"><span class="emoji">🎉</span><span>You're the <strong>Head</strong> of <strong>${t.name}</strong> — ${t.memberIds.length}/${t.maxSize} members on board.</span></div>`;
   }
 
   return `
@@ -1266,7 +1268,7 @@ function renderHome(u){
         ${DB.teams.length ? DB.teams.slice(0,5).map(t=>`
           <div class="list-row">
             <div class="row-left">
-              <div><div class="row-name">${t.name}</div><div class="row-sub">${t.memberIds.length}/${t.maxSize} members \u00b7 Head: ${t.headId ? (userById(t.headId)?.name||'Unassigned') : 'Unassigned'}</div></div>
+              <div><div class="row-name">${t.name}</div><div class="row-sub">${t.memberIds.length}/${t.maxSize} members · Head: ${t.headId ? (userById(t.headId)?.name||'Unassigned') : 'Unassigned'}</div></div>
             </div>
           </div>`).join('') : `<div class="empty">No teams created yet.</div>`}
       </div>
@@ -1302,7 +1304,7 @@ function renderTeams(u){
           <div class="list-row">
             <div class="row-left">
               <div class="avatar-sm" style="background:${avatarColor(p.id)}20;color:${avatarColor(p.id)};">${initials(p.name)}</div>
-              <div><div class="row-name">${p.name}</div><div class="row-sub">${p.email} \u00b7 ${p.tuId}</div></div>
+              <div><div class="row-name">${p.name}</div><div class="row-sub">${p.email} · ${p.tuId}</div></div>
             </div>
             <button class="btn btn-sm btn-primary" onclick="openAssignModal('${p.id}')">Assign to a team</button>
           </div>`).join('') : `<div class="empty">No one has signed up as Team Head yet.</div>`}
@@ -1320,7 +1322,7 @@ function renderTeams(u){
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
           <div>
             <h3 style="margin-bottom:2px;">${t.name}</h3>
-            <div class="row-sub">Head: ${head ? head.name : 'Unassigned'} \u00b7 ${t.memberIds.length}/${t.maxSize} members</div>
+            <div class="row-sub">Head: ${head ? head.name : 'Unassigned'} · ${t.memberIds.length}/${t.maxSize} members</div>
           </div>
           ${(u.role==='chairperson'||u.role==='vice_chair') ? `<button class="link-btn" onclick="openEditTeamModal('${t.id}')">Edit size</button>` : ''}
         </div>
@@ -1457,7 +1459,7 @@ function openAssignModal(personId){
   const isChairRole = p.role==='vice_chair' || p.role==='chairperson';
   openModal(`
     <h3>Confirm ${p.name}</h3>
-    <div class="row-sub" style="margin-bottom:14px;">${p.email} \u00b7 ${p.tuId} \u00b7 requested: ${roleLabel(p.role)}</div>
+    <div class="row-sub" style="margin-bottom:14px;">${p.email} · ${p.tuId} · requested: ${roleLabel(p.role)}</div>
     ${isChairRole ? `
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">This confirms them as ${roleLabel(p.role)} with full access.</p>
       <div class="modal-close-row">
@@ -1492,11 +1494,11 @@ async function confirmPosition(personId, teamId){
     } else {
       await setDoc(groupRef, { name:t.name, memberIds:[personId], messages:[] });
     }
-    await pushNotification(personId, `You've been assigned as Head of ${t.name}!`, '\uD83C\uDF89');
+    await pushNotification(personId, `You've been assigned as Head of ${t.name}!`, '🎉');
     toast(p.name+' confirmed as Head of '+t.name);
   } else {
     await ensureLeadershipGroupHasMember(personId);
-    await pushNotification(personId, `You've been confirmed as ${roleLabel(p.role)}.`, '\u2705');
+    await pushNotification(personId, `You've been confirmed as ${roleLabel(p.role)}.`, '✅');
     toast(p.name+' confirmed as '+roleLabel(p.role));
   }
   closeModal();
@@ -1505,10 +1507,10 @@ async function confirmPosition(personId, teamId){
 }
 async function rejectPosition(personId){
   await updateDoc(doc(db,'users',personId), { role:'student', status:'confirmed' });
-  await pushNotification(personId, `Your position request was not approved \u2014 you're set as Student for now.`, '\u2139\uFE0F');
+  await pushNotification(personId, `Your position request was not approved — you're set as Student for now.`, 'ℹ️');
   closeModal();
   await loadAllData();
-  toast('Request rejected \u2014 moved to Student role');
+  toast('Request rejected — moved to Student role');
   navigate(currentPage);
 }
 
@@ -1541,24 +1543,24 @@ function renderSessions(u){
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
           <div>
             <h3 style="margin-bottom:2px;">${s.title}</h3>
-            <div class="row-sub">${formatDate(s.date)} \u00b7 Speaker: ${s.speaker} \u00b7 Capacity ${s.capacity}</div>
-            ${s.enrollDeadline ? `<div class="row-sub" style="margin-top:2px;">${closed?'\uD83D\uDD34 Enrollment closed \u00b7 was open till ':'\uD83D\uDFE2 Enrollment open till '}${formatDate(s.enrollDeadline)}</div>` : ''}
+            <div class="row-sub">${formatDate(s.date)} · Speaker: ${s.speaker} · Capacity ${s.capacity}</div>
+            ${s.enrollDeadline ? `<div class="row-sub" style="margin-top:2px;">${closed?'🔴 Enrollment closed · was open till ':'🟢 Enrollment open till '}${formatDate(s.enrollDeadline)}</div>` : ''}
           </div>
           ${sessionBadge(s)}
         </div>
         <p style="font-size:13px;color:var(--text-muted);margin:10px 0;">${s.description}</p>
 
-        ${canManage ? `<div class="link-box"><span>\uD83D\uDD17</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>` : ''}
+        ${canManage ? `<div class="link-box"><span>🔗</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>` : ''}
 
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
           ${canRegisterRole && !isRegistered && !closed ? `<button class="btn btn-sm btn-primary" onclick="registerSession('${s.id}')">Register</button>` : ''}
           ${canRegisterRole && !isRegistered && closed ? `<span class="badge badge-pending">Enrollment closed</span>` : ''}
           ${canRegisterRole && isRegistered ? `<span class="badge badge-confirmed">Registered</span>` : ''}
-          ${isRegistered && linkedForm && !alreadyGaveFeedback ? `<button class="btn btn-sm btn-gold" onclick="openPublicFillModal('${linkedForm.id}')">\uD83D\uDCDD Give feedback</button>` : ''}
+          ${isRegistered && linkedForm && !alreadyGaveFeedback ? `<button class="btn btn-sm btn-gold" onclick="openPublicFillModal('${linkedForm.id}')">📝 Give feedback</button>` : ''}
           ${isRegistered && linkedForm && alreadyGaveFeedback ? `<span class="badge badge-confirmed">Feedback submitted</span>` : ''}
           ${canManage ? `<button class="btn btn-sm" onclick="viewRegistrations('${s.id}')">View registrations (${(s.registrations||[]).length})</button>` : ''}
-          ${canManage ? `<button class="btn btn-sm" onclick="openSessionQrModal('${s.id}')">\uD83D\uDCF2 QR</button>` : ''}
-          ${canManage ? `<button class="btn btn-sm" onclick="openEditEnrollModal('${s.id}')">\u23F1\uFE0F Enrollment window</button>` : ''}
+          ${canManage ? `<button class="btn btn-sm" onclick="openSessionQrModal('${s.id}')">📲 QR</button>` : ''}
+          ${canManage ? `<button class="btn btn-sm" onclick="openEditEnrollModal('${s.id}')">⏱️ Enrollment window</button>` : ''}
           ${u.role==='chairperson' ? `<button class="btn btn-sm btn-danger-outline" onclick="deleteSession('${s.id}')">Delete</button>` : ''}
         </div>
       </div>
@@ -1622,7 +1624,7 @@ function viewRegistrations(sessionId){
     </tr>`;
   }).join('');
   openModal(`
-    <h3>Registrations \u2014 ${s.title}</h3>
+    <h3>Registrations — ${s.title}</h3>
     <div style="overflow-x:auto;">
     <table>
       <tr><th>Name</th><th>College ID</th><th>Answers</th><th>Attendance</th><th></th></tr>
@@ -1644,22 +1646,22 @@ async function markAttendance(sessionId, studentId, newVal){
         sessionId, sessionTitle:s.title, sessionDate:s.date, studentId,
         name:'', issuedAt:Date.now(), issuedBy:currentUser().id
       });
-      await pushNotification(studentId, `Your attendance for "${s.title}" is marked \u2014 your e-certificate is ready! Add your name in Profile to download it.`, '\uD83C\uDF93');
+      await pushNotification(studentId, `Your attendance for "${s.title}" is marked — your e-certificate is ready! Add your name in Profile to download it.`, '🎓');
     }
   }
   await loadAllData();
-  toast(newVal ? 'Marked present \u2014 certificate generated' : 'Attendance undone');
+  toast(newVal ? 'Marked present — certificate generated' : 'Attendance undone');
   viewRegistrations(sessionId);
 }
 function openSessionQrModal(sessionId){
   const s = DB.sessions.find(x=>x.id===sessionId);
   const link = sessionLink(sessionId);
   openModal(`
-    <h3>\uD83D\uDCF2 QR \u2014 ${s.title}</h3>
+    <h3>📲 QR — ${s.title}</h3>
     <div class="qr-box">
       <div class="qr-canvas-wrap" id="qr-canvas-wrap"></div>
-      <div class="link-box" style="width:100%;"><span>\uD83D\uDD17</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>
-      <div style="font-size:12px;color:var(--text-muted);text-align:center;">Scanning this logs the participant in, enrolls them if they haven\u2019t already, and then shows the session\u2019s feedback form.</div>
+      <div class="link-box" style="width:100%;"><span>🔗</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>
+      <div style="font-size:12px;color:var(--text-muted);text-align:center;">Scanning this logs the participant in, enrolls them if they haven't already, and then shows the session's feedback form.</div>
     </div>
     <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
   `);
@@ -1669,15 +1671,15 @@ function openSessionQrModal(sessionId){
     if(window.QRCode){
       new QRCode(target, { text: link, width:180, height:180, colorDark:'#003B5C', colorLight:'#ffffff' });
     } else {
-      target.innerHTML = `<div class="empty">QR library failed to load \u2014 use the link above instead.</div>`;
+      target.innerHTML = `<div class="empty">QR library failed to load — use the link above instead.</div>`;
     }
   }
 }
 function openEditEnrollModal(sessionId){
   const s = DB.sessions.find(x=>x.id===sessionId);
   openModal(`
-    <h3>Enrollment window \u2014 ${s.title}</h3>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Decide how late people can still enroll for this session \u2014 e.g. keep it open a day or two after the event if the site went up late.</p>
+    <h3>Enrollment window — ${s.title}</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Decide how late people can still enroll for this session — e.g. keep it open a day or two after the event if the site went up late.</p>
     <div class="form-group"><label>Enrollment closes</label><input class="field-input" id="ee-deadline" type="datetime-local" value="${(s.enrollDeadline||s.date||'').slice(0,16)}"/></div>
     <div class="modal-close-row">
       <button class="btn" onclick="closeModal()">Cancel</button>
@@ -1699,7 +1701,7 @@ async function clearEnrollDeadline(sessionId){
   await updateDoc(doc(db,'sessions',sessionId), { enrollDeadline: null });
   closeModal();
   await loadAllData();
-  toast('Enrollment left open \u2014 no deadline');
+  toast('Enrollment left open — no deadline');
   navigate('sessions');
 }
 function openCreateSessionModal(){
@@ -1711,12 +1713,12 @@ function openCreateSessionModal(){
       <div class="form-group"><label>Capacity</label><input class="field-input" id="ns-capacity" type="number" value="60"/></div>
     </div>
     <div class="form-group"><label>Date & time</label><input class="field-input" id="ns-date" type="datetime-local"/></div>
-    <div class="form-group"><label>Enrollment closes (optional \u2014 leave blank to keep open)</label><input class="field-input" id="ns-deadline" type="datetime-local"/></div>
+    <div class="form-group"><label>Enrollment closes (optional — leave blank to keep open)</label><input class="field-input" id="ns-deadline" type="datetime-local"/></div>
     <div class="form-group"><label>Description</label><textarea class="field-input" id="ns-desc" rows="3"></textarea></div>
     <div class="form-group">
       <label>Registration questions</label>
       <div class="questions-list" id="ns-questions">
-        <div class="q-item"><input class="field-input" placeholder="e.g. Branch & Year" style="margin-bottom:0;"/><button onclick="this.parentElement.remove()">\u00d7</button></div>
+        <div class="q-item"><input class="field-input" placeholder="e.g. Branch & Year" style="margin-bottom:0;"/><button onclick="this.parentElement.remove()">×</button></div>
       </div>
       <button class="link-btn" onclick="addQuestionField()">+ Add question</button>
     </div>
@@ -1730,7 +1732,7 @@ function addQuestionField(){
   const wrap = $('#ns-questions');
   const div = document.createElement('div');
   div.className='q-item';
-  div.innerHTML = `<input class="field-input" placeholder="Question" style="margin-bottom:0;"/><button onclick="this.parentElement.remove()">\u00d7</button>`;
+  div.innerHTML = `<input class="field-input" placeholder="Question" style="margin-bottom:0;"/><button onclick="this.parentElement.remove()">×</button>`;
   wrap.appendChild(div);
 }
 async function createSession(){
@@ -1793,17 +1795,17 @@ function certificateInnerHtml(cert, displayName){
     <div class="cert-corner cert-tr"></div>
     <div class="cert-corner cert-bl"></div>
     <div class="cert-corner cert-br"></div>
-    <div class="cert-seal">\u2705</div>
+    <div class="cert-seal">✅</div>
     <div class="cert-brand">
       <div class="cert-brand-mark">TE</div>
       <div>
-        <div class="cert-brand-t1">IEEE \u00b7 TERNA ENGINEERING COLLEGE</div>
+        <div class="cert-brand-t1">IEEE · TERNA ENGINEERING COLLEGE</div>
         <div class="cert-brand-t2">Student Branch Chapter</div>
       </div>
     </div>
     <div class="cert-title">Certificate of Participation</div>
     <div class="cert-sub">This is to proudly certify that</div>
-    <div class="cert-name">${displayName || '\u2014'}</div>
+    <div class="cert-name">${displayName || '—'}</div>
     <div class="cert-sub">has successfully participated in the session</div>
     <div class="cert-session">${s.title}</div>
     <div class="cert-sub">held on ${s.date ? formatDate(s.date) : ''}, organized by IEEE-TEC Student Branch, Terna Engineering College.</div>
@@ -1821,7 +1823,7 @@ function certificateInnerHtml(cert, displayName){
         <div class="cert-sign-label">Chairperson, IEEE-TEC</div>
       </div>
     </div>
-    <div class="cert-verify-note">\u2705 Digitally verified by IEEE-TEC, Terna Engineering College \u2014 scan the code above to verify authenticity.</div>
+    <div class="cert-verify-note">✅ Digitally verified by IEEE-TEC, Terna Engineering College — scan the code above to verify authenticity.</div>
   `;
 }
 function renderCertQr(certId){
@@ -1836,7 +1838,7 @@ function openCertificateModal(certId){
   if(!cert) return;
   if(!cert.name){
     openModal(`
-      <h3>\uD83C\uDF93 One last step</h3>
+      <h3>🎓 One last step</h3>
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Enter your full name exactly as it should appear on the certificate.</p>
       <div class="form-group"><label>Full name</label><input class="field-input" id="cert-name-input" placeholder="e.g. Aarav S. Sharma"/></div>
       <div class="modal-close-row">
@@ -1859,21 +1861,21 @@ async function saveCertificateName(certId){
 }
 function showCertificatePreview(cert, name){
   openModal(`
-    <h3 style="margin-bottom:12px;">\uD83C\uDF93 ${cert.sessionTitle}</h3>
+    <h3 style="margin-bottom:12px;">🎓 ${cert.sessionTitle}</h3>
     <div class="cert-scale-wrap">
       <div class="cert-card" id="cert-card-${cert.id}">${certificateInnerHtml(cert, name)}</div>
     </div>
     <div class="modal-close-row">
       <button class="btn" onclick="closeModal()">Close</button>
-      <button class="btn btn-primary" onclick="downloadCertificate('${cert.id}')">\u2B07\uFE0F Download certificate</button>
+      <button class="btn btn-primary" onclick="downloadCertificate('${cert.id}')">⬇️ Download certificate</button>
     </div>
   `);
   setTimeout(()=>renderCertQr(cert.id), 80);
 }
 async function downloadCertificate(certId){
   const node = document.getElementById('cert-card-'+certId);
-  if(!node || !window.html2canvas){ toast('Could not generate the image \u2014 please try again.'); return; }
-  toast('Preparing your download\u2026');
+  if(!node || !window.html2canvas){ toast('Could not generate the image — please try again.'); return; }
+  toast('Preparing your download…');
   try{
     const canvas = await html2canvas(node, { scale:2, backgroundColor:'#ffffff' });
     const a = document.createElement('a');
@@ -1882,7 +1884,7 @@ async function downloadCertificate(certId){
     a.click();
   }catch(e){
     console.error(e);
-    toast('Download failed \u2014 please try again.');
+    toast('Download failed — please try again.');
   }
 }
 
@@ -1908,7 +1910,7 @@ function renderAttendancePermissionsCard(){
 }
 async function toggleAttendancePermission(userId, newVal){
   await updateDoc(doc(db,'users',userId), { canMarkAttendance:newVal });
-  await pushNotification(userId, newVal ? "You've been given permission to mark session attendance." : "Your attendance-marking permission was revoked.", newVal?'\u2705':'\u2139\uFE0F');
+  await pushNotification(userId, newVal ? "You've been given permission to mark session attendance." : "Your attendance-marking permission was revoked.", newVal?'✅':'ℹ️');
   await loadAllData();
   toast(newVal ? 'Access granted' : 'Access revoked');
   navigate('teams');
@@ -1937,7 +1939,7 @@ function openGroup(groupId){
   const u = currentUser();
   $('#page-title').textContent = g.name;
   $('#content').innerHTML = `
-    <button class="link-btn" style="margin-bottom:14px;" onclick="navigate('groups')">\u2190 Back to groups</button>
+    <button class="link-btn" style="margin-bottom:14px;" onclick="navigate('groups')">← Back to groups</button>
     <div class="chat-wrap">
       <div class="chat-messages" id="chat-messages">
         ${(g.messages||[]).map(m=>{
@@ -1989,21 +1991,21 @@ function renderFeedback(u){
     return `
       <div class="card feedback-card" style="margin-bottom:16px;">
         <h3 style="margin-bottom:2px;">${f.title}</h3>
-        <div class="row-sub">${s ? 'Linked to: '+s.title+' \u00b7 ' : ''}${(f.questions||[]).length} question${(f.questions||[]).length===1?'':'s'} \u00b7 ${count} response${count===1?'':'s'}</div>
+        <div class="row-sub">${s ? 'Linked to: '+s.title+' · ' : ''}${(f.questions||[]).length} question${(f.questions||[]).length===1?'':'s'} · ${count} response${count===1?'':'s'}</div>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-sm btn-primary" onclick="openPublicFillModal('${f.id}')">\u270D\uFE0F Fill this form</button>
-          ${canViewAdmin ? `<button class="btn btn-sm" onclick="openQrModal('${f.id}')">\uD83D\uDCF2 QR code</button>` : ''}
+          <button class="btn btn-sm btn-primary" onclick="openPublicFillModal('${f.id}')">✍️ Fill this form</button>
+          ${canViewAdmin ? `<button class="btn btn-sm" onclick="openQrModal('${f.id}')">📲 QR code</button>` : ''}
           ${canViewAdmin ? `<button class="btn btn-sm" onclick="openFeedbackResponsesModal('${f.id}')">View responses (${count})</button>` : ''}
           ${canManage ? `<button class="btn btn-sm btn-danger-outline" onclick="deleteFeedbackForm('${f.id}')">Delete</button>` : ''}
         </div>
       </div>`;
   }).join('');
-  return `<div class="page-header">${createBtn}</div>${cards || `<div class="empty">No feedback forms yet.${canManage?' Create one to get started \u2014 you\u2019ll get a shareable QR code instantly.':''}</div>`}`;
+  return `<div class="page-header">${createBtn}</div>${cards || `<div class="empty">No feedback forms yet.${canManage?' Create one to get started — you\u2019ll get a shareable QR code instantly.':''}</div>`}`;
 }
 function openCreateFeedbackModal(){
   const sessionOptions = DB.sessions.map(s=>`<option value="${s.id}">${s.title}</option>`).join('');
   openModal(`
-    <h3>\uD83D\uDCDD Create feedback form</h3>
+    <h3>📝 Create feedback form</h3>
     <div class="form-group"><label>Form title</label><input class="field-input" id="fb-title" placeholder="e.g. Workshop Feedback"/></div>
     <div class="form-group">
       <label>Link to a session (optional)</label>
@@ -2015,7 +2017,7 @@ function openCreateFeedbackModal(){
         <div class="q-item">
           <input class="field-input" placeholder="Question" style="margin-bottom:0;"/>
           <select class="field-input" style="max-width:112px;margin-bottom:0;flex:0 0 auto;"><option value="text">Text</option><option value="rating">Rating</option></select>
-          <button onclick="this.parentElement.remove()">\u00d7</button>
+          <button onclick="this.parentElement.remove()">×</button>
         </div>
       </div>
       <button class="link-btn" onclick="addFeedbackQuestionField()">+ Add question</button>
@@ -2030,7 +2032,7 @@ function addFeedbackQuestionField(){
   const wrap = $('#fb-questions');
   const div = document.createElement('div');
   div.className='q-item';
-  div.innerHTML = `<input class="field-input" placeholder="Question" style="margin-bottom:0;"/><select class="field-input" style="max-width:112px;margin-bottom:0;flex:0 0 auto;"><option value="text">Text</option><option value="rating">Rating</option></select><button onclick="this.parentElement.remove()">\u00d7</button>`;
+  div.innerHTML = `<input class="field-input" placeholder="Question" style="margin-bottom:0;"/><select class="field-input" style="max-width:112px;margin-bottom:0;flex:0 0 auto;"><option value="text">Text</option><option value="rating">Rating</option></select><button onclick="this.parentElement.remove()">×</button>`;
   wrap.appendChild(div);
 }
 async function createFeedbackForm(){
@@ -2047,7 +2049,7 @@ async function createFeedbackForm(){
   await setDoc(doc(db,'feedbackForms',id), { title, sessionId, questions, createdBy: currentUser().id, createdAt: Date.now() });
   closeModal();
   await loadAllData();
-  toast('Feedback form created \u2014 here\u2019s your QR code');
+  toast('Feedback form created — here\u2019s your QR code');
   navigate('feedback');
   openQrModal(id);
 }
@@ -2061,11 +2063,11 @@ function openQrModal(formId){
   const f = DB.feedbackForms.find(x=>x.id===formId);
   const link = feedbackLink(formId);
   openModal(`
-    <h3>\uD83D\uDCF2 QR \u2014 ${f.title}</h3>
+    <h3>📲 QR — ${f.title}</h3>
     <div class="qr-box">
       <div class="qr-canvas-wrap" id="qr-canvas-wrap"></div>
-      <div class="link-box" style="width:100%;"><span>\uD83D\uDD17</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>
-      <div style="font-size:12px;color:var(--text-muted);text-align:center;">Scan this to open the feedback form \u2014 the person will be asked to log in with their @ternaengg.ac.in account first, then the form opens automatically.</div>
+      <div class="link-box" style="width:100%;"><span>🔗</span><input readonly value="${link}" onclick="this.select()"/><button class="link-btn" onclick="copyLink('${link}')">Copy</button></div>
+      <div style="font-size:12px;color:var(--text-muted);text-align:center;">Scan this to open the feedback form — the person will be asked to log in with their @ternaengg.ac.in account first, then the form opens automatically.</div>
     </div>
     <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
   `);
@@ -2075,7 +2077,7 @@ function openQrModal(formId){
     if(window.QRCode){
       new QRCode(target, { text: link, width:180, height:180, colorDark:'#003B5C', colorLight:'#ffffff' });
     } else {
-      target.innerHTML = `<div class="empty">QR library failed to load \u2014 use the link above instead.</div>`;
+      target.innerHTML = `<div class="empty">QR library failed to load — use the link above instead.</div>`;
     }
   }
 }
@@ -2088,32 +2090,32 @@ const FB_PALETTE = ['#00629B','#F2A900','#2E7D32','#C62828','#534AB7','#00838F',
 function _fbPct(n, total){ return total ? Math.round((n/total)*1000)/10 : 0; }
 
 // Older responses (saved before this update) don't have submittedByName /
-// submittedByEmail stored on them directly \u2014 only submittedBy (the user
+// submittedByEmail stored on them directly — only submittedBy (the user
 // id). So for those, look the person up from DB.users instead of showing
 // blanks. Anonymous responses from the old no-login QR flow (no submittedBy
-// at all) will still show as \u2014 / \u2014, since there's no identity to recover.
+// at all) will still show as — / —, since there's no identity to recover.
 function _responderInfo(r){
   if(r.submittedByName || r.submittedByEmail){
-    return { name: r.submittedByName||'\u2014', email: r.submittedByEmail||'\u2014' };
+    return { name: r.submittedByName||'—', email: r.submittedByEmail||'—' };
   }
   const u = r.submittedBy ? userById(r.submittedBy) : null;
-  return { name: u ? u.name : '\u2014', email: u ? u.email : '\u2014' };
+  return { name: u ? u.name : '—', email: u ? u.email : '—' };
 }
 
 function openFeedbackResponsesModal(formId){
   const f = DB.feedbackForms.find(x=>x.id===formId);
   const responses = DB.feedbackResponses.filter(r=>r.formId===formId);
   openModal(`
-    <h3>Responses \u2014 ${f.title}</h3>
-    <div class="row-sub" style="margin-bottom:12px;">${responses.length} response${responses.length===1?'':'s'} \u00b7 one per person (their latest answer is what\u2019s counted)</div>
+    <h3>Responses — ${f.title}</h3>
+    <div class="row-sub" style="margin-bottom:12px;">${responses.length} response${responses.length===1?'':'s'} · one per person (their latest answer is what\u2019s counted)</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-      <button class="btn btn-sm" onclick="downloadFeedbackCSV('${formId}')">\u2B07\uFE0F CSV</button>
-      <button class="btn btn-sm" onclick="downloadFeedbackExcel('${formId}')">\u2B07\uFE0F Excel</button>
-      <button class="btn btn-sm" onclick="downloadFeedbackPDF('${formId}')">\u2B07\uFE0F PDF</button>
+      <button class="btn btn-sm" onclick="downloadFeedbackCSV('${formId}')">⬇️ CSV</button>
+      <button class="btn btn-sm" onclick="downloadFeedbackExcel('${formId}')">⬇️ Excel</button>
+      <button class="btn btn-sm" onclick="downloadFeedbackPDF('${formId}')">⬇️ PDF</button>
     </div>
     <div class="auth-tabs" style="margin-bottom:16px;">
-      <button class="auth-tab active" id="fb-tab-summary" onclick="switchFeedbackTab('summary')">\uD83D\uDCCA Summary</button>
-      <button class="auth-tab" id="fb-tab-individual" onclick="switchFeedbackTab('individual')">\uD83D\uDCCB Individual responses</button>
+      <button class="auth-tab active" id="fb-tab-summary" onclick="switchFeedbackTab('summary')">📊 Summary</button>
+      <button class="auth-tab" id="fb-tab-individual" onclick="switchFeedbackTab('individual')">📋 Individual responses</button>
     </div>
     <div id="fb-summary-wrap"></div>
     <div id="fb-individual-wrap" style="display:none;"></div>
@@ -2121,7 +2123,7 @@ function openFeedbackResponsesModal(formId){
   `);
   // Both tabs are built right away (not just on click) so switching between
   // them is instant, and so the charts are already correct the first time
-  // this modal opens \u2014 nothing needs a manual "generate" click.
+  // this modal opens — nothing needs a manual "generate" click.
   renderFeedbackSummary(formId);
   renderFeedbackIndividual(formId);
 }
@@ -2142,7 +2144,7 @@ function _fbLegendRow(label, count, total, color){
           <span style="width:10px;height:10px;border-radius:50%;background:${color};flex:0 0 auto;display:inline-block;"></span>
           <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>
         </span>
-        <span style="color:var(--text-muted);flex:0 0 auto;">${count} \u00b7 ${pct}%</span>
+        <span style="color:var(--text-muted);flex:0 0 auto;">${count} · ${pct}%</span>
       </div>
       <div style="background:var(--blue-light);border-radius:6px;height:8px;overflow:hidden;">
         <div style="width:${pct}%;height:100%;background:${color};"></div>
@@ -2150,7 +2152,7 @@ function _fbLegendRow(label, count, total, color){
     </div>`;
 }
 // Pure-CSS pie: a circular div painted with a conic-gradient. No canvas, no
-// chart library, no draw-after-paint timing \u2014 it's just a background
+// chart library, no draw-after-paint timing — it's just a background
 // image, so it's correct the instant the HTML string is inserted, even
 // inside a modal that was display:none a moment ago.
 function _fbPieCircleHtml(data, palette, size){
@@ -2177,15 +2179,15 @@ function _fbQuestionSummary(f, qi, responses){
     const counts = {1:0,2:0,3:0,4:0,5:0};
     answers.forEach(a=>{ const n=Number(a); if(n>=1&&n<=5) counts[n]=(counts[n]||0)+1; });
     const total = counts[1]+counts[2]+counts[3]+counts[4]+counts[5];
-    const avg = total ? (( counts[1]*1+counts[2]*2+counts[3]*3+counts[4]*4+counts[5]*5)/total).toFixed(2) : '\u2014';
+    const avg = total ? (( counts[1]*1+counts[2]*2+counts[3]*3+counts[4]*4+counts[5]*5)/total).toFixed(2) : '—';
     const order = [5,4,3,2,1];
-    const legend = order.map((n,i)=>_fbLegendRow('\u2605'.repeat(n)+' ('+n+')', counts[n], total, FB_PALETTE[i])).join('');
+    const legend = order.map((n,i)=>_fbLegendRow('★'.repeat(n)+' ('+n+')', counts[n], total, FB_PALETTE[i])).join('');
     const pie = _fbPieCircleHtml(order.map(n=>counts[n]), FB_PALETTE);
     const html = `
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
           <h4 style="font-size:14px;">${q.text}</h4>
-          <span class="row-sub">${total} response${total===1?'':'s'} \u00b7 avg ${avg} \u2605</span>
+          <span class="row-sub">${total} response${total===1?'':'s'} · avg ${avg} ★</span>
         </div>
         <div style="display:flex;gap:22px;flex-wrap:wrap;align-items:center;">
           ${pie}
@@ -2196,7 +2198,7 @@ function _fbQuestionSummary(f, qi, responses){
   }
 
   // text-type question: treat as categorical (pie + %) if there aren't too
-  // many distinct answers, otherwise fall back to a plain answer list \u2014
+  // many distinct answers, otherwise fall back to a plain answer list —
   // exactly how Google Forms handles "Short answer" / "Paragraph" questions.
   const tally = {};
   let answered = 0;
@@ -2232,7 +2234,7 @@ function _fbQuestionSummary(f, qi, responses){
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
           <h4 style="font-size:14px;">${q.text}</h4>
-          <span class="row-sub">${answered} response${answered===1?'':'s'} \u00b7 too many distinct answers to chart</span>
+          <span class="row-sub">${answered} response${answered===1?'':'s'} · too many distinct answers to chart</span>
         </div>
         <div style="max-height:220px;overflow-y:auto;">${listItems || '<div class="empty">No answers yet.</div>'}</div>
       </div>`,
@@ -2246,7 +2248,7 @@ function renderFeedbackSummary(formId){
   if(!wrap) return;
   const qs = f.questions||[];
   if(!qs.length){ wrap.innerHTML = '<div class="empty">This form has no questions.</div>'; return; }
-  if(!responses.length){ wrap.innerHTML = '<div class="empty">No responses yet \u2014 charts will appear here automatically as soon as people respond, no need to generate anything.</div>'; return; }
+  if(!responses.length){ wrap.innerHTML = '<div class="empty">No responses yet — charts will appear here automatically as soon as people respond, no need to generate anything.</div>'; return; }
   const parts = qs.map((q,qi)=>_fbQuestionSummary(f, qi, responses));
   wrap.innerHTML = parts.map(p=>p.html).join('');
 }
@@ -2261,13 +2263,13 @@ function renderFeedbackIndividual(formId){
     const who = _responderInfo(r);
     const cells = qs.map((q,i)=>{
       const a = (r.answers||[])[i];
-      return `<td>${q.type==='rating' ? ('\u2B50'.repeat(Number(a)||0)||'\u2014') : (a||'\u2014')}</td>`;
+      return `<td>${q.type==='rating' ? ('⭐'.repeat(Number(a)||0)||'—') : (a||'—')}</td>`;
     }).join('');
     return `<tr>
       <td>${who.name}</td>
       <td>${who.email}</td>
       ${cells}
-      <td>${r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '\u2014'}</td>
+      <td>${r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}</td>
     </tr>`;
   }).join('');
   const wrap = document.getElementById('fb-individual-wrap');
@@ -2294,7 +2296,7 @@ function _feedbackTableData(formId){
       return q.type==='rating' ? (Number(a)||0) : (a||'');
     });
     const when = r.submittedAt ? new Date(r.submittedAt).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
-    return [who.name==='\u2014'?'':who.name, who.email==='\u2014'?'':who.email, ...cells, when];
+    return [who.name==='—'?'':who.name, who.email==='—'?'':who.email, ...cells, when];
   });
   return { title: f.title || 'feedback', header, rows };
 }
@@ -2308,7 +2310,7 @@ function _downloadBlob(blob, filename){
 function _safeFileName(s){ return String(s).replace(/[^\w\-]+/g,'_').slice(0,60); }
 
 // These downloads are built from whatever is currently loaded from Firestore,
-// as a plain file on the admin's own device \u2014 so once downloaded, the
+// as a plain file on the admin's own device — so once downloaded, the
 // file is independent of Firestore: clearing/resetting the live data later
 // does not touch files that were already downloaded.
 function downloadFeedbackCSV(formId){
@@ -2344,7 +2346,7 @@ function questionFieldHtml(q, i, prefix){
   if(q.type==='rating'){
     return `<div class="form-group"><label>${q.text}</label>
       <div class="stars-row" data-qi="${i}">
-        ${[1,2,3,4,5].map(n=>`<span class="star" data-val="${n}" onclick="setStar(this,${i},'${prefix}')">\u2605</span>`).join('')}
+        ${[1,2,3,4,5].map(n=>`<span class="star" data-val="${n}" onclick="setStar(this,${i},'${prefix}')">★</span>`).join('')}
       </div>
       <input type="hidden" id="${prefix}-q-${i}" value="0"/>
     </div>`;
@@ -2386,7 +2388,7 @@ async function submitFeedbackInApp(formId){
   });
   closeModal();
   await loadAllData();
-  toast(wasResubmit ? 'Feedback updated \u2014 thanks! \uD83C\uDF89' : 'Thanks for your feedback! \uD83C\uDF89');
+  toast(wasResubmit ? 'Feedback updated — thanks! 🎉' : 'Thanks for your feedback! 🎉');
   navigate('feedback');
 }
 
@@ -2403,11 +2405,11 @@ async function initPublicFeedbackRoute(){
 async function initPublicVerifyRoute(code){
   const wrap = $('#view-public');
   wrap.style.display='flex';
-  wrap.innerHTML = `<div class="public-card"><div class="empty">Verifying certificate\u2026</div></div>`;
+  wrap.innerHTML = `<div class="public-card"><div class="empty">Verifying certificate…</div></div>`;
   try{
     const snap = await getDoc(doc(db,'certificates',code));
     if(!snap.exists()){
-      wrap.innerHTML = `<div class="public-card"><div class="public-brand"><div class="mark">TE</div><div><strong>IEEE-TEC Portal</strong></div></div><div class="empty">\u274C No certificate found for this code. It may be invalid or revoked.</div></div>`;
+      wrap.innerHTML = `<div class="public-card"><div class="public-brand"><div class="mark">TE</div><div><strong>IEEE-TEC Portal</strong></div></div><div class="empty">❌ No certificate found for this code. It may be invalid or revoked.</div></div>`;
       return;
     }
     const cert = { id: snap.id, ...snap.data() };
@@ -2416,7 +2418,7 @@ async function initPublicVerifyRoute(code){
         <div class="public-brand"><div class="mark">TE</div><div><div style="font-weight:800;">IEEE-TEC Portal</div><div style="font-size:12px;color:var(--text-muted);">Certificate verification</div></div></div>
         ${cert.name ? `
           <div class="cert-scale-wrap"><div class="cert-card" id="cert-card-${cert.id}">${certificateInnerHtml(cert, cert.name)}</div></div>
-          <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="downloadCertificate('${cert.id}')">\u2B07\uFE0F Download certificate</button>
+          <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="downloadCertificate('${cert.id}')">⬇️ Download certificate</button>
         ` : `<div class="empty">This certificate hasn\u2019t been claimed by its recipient yet.</div>`}
       </div>`;
     if(cert.name) setTimeout(()=>renderCertQr(cert.id), 80);
@@ -2439,14 +2441,14 @@ function renderProfile(u){
         <div class="avatar-sm" style="width:56px;height:56px;font-size:19px;">${initials(u.name)}</div>
         <div>
           <div style="font-size:17px;font-weight:700;">${u.name}</div>
-          <div class="row-sub">${u.email} \u00b7 ${u.tuId}</div>
-          <span class="role-badge" style="margin-top:6px;">${roleLabel(u.role)}${u.status==='pending' ? ' \u00b7 pending' : ''}</span>
+          <div class="row-sub">${u.email} · ${u.tuId}</div>
+          <span class="role-badge" style="margin-top:6px;">${roleLabel(u.role)}${u.status==='pending' ? ' · pending' : ''}</span>
         </div>
       </div>
     </div>
     <div class="grid grid-3" style="margin-bottom:16px;">
       <div class="card"><div class="stat">${u.points||0}</div><div class="stat-label">Credit points</div></div>
-      <div class="card"><div class="stat">${team ? team.name : '\u2014'}</div><div class="stat-label">Team</div></div>
+      <div class="card"><div class="stat">${team ? team.name : '—'}</div><div class="stat-label">Team</div></div>
       <div class="card"><div class="stat">${registered.length}</div><div class="stat-label">Sessions registered</div></div>
     </div>
     <div class="card" style="margin-bottom:16px;">
@@ -2460,7 +2462,7 @@ function renderProfile(u){
       }).join('') : '<div class="empty">No sessions registered yet.</div>'}
     </div>
     <div class="card">
-      <h3>\uD83C\uDF93 My e-certificates</h3>
+      <h3>🎓 My e-certificates</h3>
       ${myCerts.length ? myCerts.map(c=>`
         <div class="list-row">
           <div><div class="row-name">${c.sessionTitle}</div><div class="row-sub">${c.sessionDate?formatDate(c.sessionDate):''}</div></div>
