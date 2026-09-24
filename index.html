@@ -241,6 +241,14 @@
     max-height:86vh;overflow-y:auto;
     padding:24px 24px;
     box-shadow:0 30px 70px rgba(0,20,40,0.3);
+    transition:width .18s ease, height .18s ease, max-width .18s ease, max-height .18s ease, border-radius .18s ease;
+  }
+  .modal.modal-wide{ width:760px; }
+  .modal.fullscreen{
+    width:100vw; height:100vh;
+    max-width:100vw; max-height:100vh;
+    border-radius:0;
+    padding:20px 20px calc(20px + env(safe-area-inset-bottom));
   }
   .modal h3{font-size:16px;font-weight:700;margin-bottom:16px;}
   .modal-close-row{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap;}
@@ -545,6 +553,18 @@
     .cert-title{ font-size:22px; }
     .cert-name{ font-size:24px; }
     .cert-session{ font-size:14px; }
+  }
+
+  /* ---- Fullscreen modal toggle (View responses) ---- */
+  .modal-fs-toolbar{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    margin-bottom:4px; flex-wrap:wrap;
+  }
+  .modal-fs-toolbar h3{ margin-bottom:0; }
+  .modal-fs-btn{ flex-shrink:0; white-space:nowrap; }
+  .modal.fullscreen #fb-summary-wrap,
+  .modal.fullscreen #fb-individual-wrap{
+    max-height:none;
   }
 </style>
 </head>
@@ -2085,7 +2105,11 @@ function openQrModal(formId){
    chart + percentage breakdown for every question (no manual "pick a
    question" step — it just computes fresh from current data, every time
    this modal opens), and an "Individual responses" tab with the full sheet
-   plus CSV/Excel/PDF export. */
+   plus CSV/Excel/PDF export. A full-screen toggle lets the admin expand
+   the whole modal to the viewport so everything is visible without the
+   modal itself needing to scroll (inner tables can still scroll
+   horizontally on narrow screens — that's inherent to wide tables, not
+   the modal). */
 const FB_PALETTE = ['#00629B','#F2A900','#2E7D32','#C62828','#534AB7','#00838F','#B26A00','#993C1D','#AD1457','#3949AB'];
 function _fbPct(n, total){ return total ? Math.round((n/total)*1000)/10 : 0; }
 
@@ -2106,7 +2130,10 @@ function openFeedbackResponsesModal(formId){
   const f = DB.feedbackForms.find(x=>x.id===formId);
   const responses = DB.feedbackResponses.filter(r=>r.formId===formId);
   openModal(`
-    <h3>Responses — ${f.title}</h3>
+    <div class="modal-fs-toolbar">
+      <h3>Responses — ${f.title}</h3>
+      <button class="btn btn-sm modal-fs-btn" id="fb-fullscreen-btn" onclick="toggleResponsesFullscreen()" type="button" title="Toggle full screen view">⛶ Full screen</button>
+    </div>
     <div class="row-sub" style="margin-bottom:12px;">${responses.length} response${responses.length===1?'':'s'} · one per person (their latest answer is what\u2019s counted)</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
       <button class="btn btn-sm" onclick="downloadFeedbackCSV('${formId}')">⬇️ CSV</button>
@@ -2120,7 +2147,7 @@ function openFeedbackResponsesModal(formId){
     <div id="fb-summary-wrap"></div>
     <div id="fb-individual-wrap" style="display:none;"></div>
     <div class="modal-close-row"><button class="btn" onclick="closeModal()">Close</button></div>
-  `);
+  `, true);
   // Both tabs are built right away (not just on click) so switching between
   // them is instant, and so the charts are already correct the first time
   // this modal opens — nothing needs a manual "generate" click.
@@ -2132,6 +2159,16 @@ function switchFeedbackTab(tab){
   $('#fb-tab-individual').classList.toggle('active', tab==='individual');
   $('#fb-summary-wrap').style.display = tab==='summary' ? 'block' : 'none';
   $('#fb-individual-wrap').style.display = tab==='individual' ? 'block' : 'none';
+}
+// Expands the responses modal to fill the whole screen (no outer scroll
+// needed to see everything at once) and shrinks it back on toggle.
+function toggleResponsesFullscreen(){
+  const modal = $('#modal-body');
+  if(!modal) return;
+  const isFs = modal.classList.toggle('fullscreen');
+  modal.classList.remove('modal-wide');
+  const btn = $('#fb-fullscreen-btn');
+  if(btn) btn.innerHTML = isFs ? '⤡ Exit full screen' : '⛶ Full screen';
 }
 
 /* ---- Summary tab: one auto-generated chart + % legend per question ---- */
@@ -2236,7 +2273,7 @@ function _fbQuestionSummary(f, qi, responses){
           <h4 style="font-size:14px;">${q.text}</h4>
           <span class="row-sub">${answered} response${answered===1?'':'s'} · too many distinct answers to chart</span>
         </div>
-        <div style="max-height:220px;overflow-y:auto;">${listItems || '<div class="empty">No answers yet.</div>'}</div>
+        <div>${listItems || '<div class="empty">No answers yet.</div>'}</div>
       </div>`,
     draw: null
   };
@@ -2474,13 +2511,22 @@ function renderProfile(u){
 
 /* =====================================================================
    MODAL HELPERS
+   openModal accepts an optional `wide` flag: when true, the modal opens
+   a bit wider by default (useful for the responses view's table/chart
+   content). Every openModal() call also resets any leftover
+   "fullscreen" state from a previous modal, so the fullscreen toggle
+   never bleeds into the next thing you open.
 ===================================================================== */
-function openModal(html){
-  $('#modal-body').innerHTML = html;
+function openModal(html, wide){
+  const modal = $('#modal-body');
+  modal.innerHTML = html;
+  modal.classList.remove('fullscreen');
+  modal.classList.toggle('modal-wide', !!wide);
   $('#modal-overlay').classList.add('show');
 }
 function closeModal(){
   $('#modal-overlay').classList.remove('show');
+  $('#modal-body').classList.remove('fullscreen');
 }
 $('#modal-overlay').addEventListener('click', (e)=>{
   if(e.target.id==='modal-overlay') closeModal();
@@ -2509,6 +2555,7 @@ Object.assign(window, {
   openQrModal, openFeedbackResponsesModal, openPublicFillModal, submitFeedbackInApp,
   setStar,
   downloadFeedbackCSV, downloadFeedbackExcel, downloadFeedbackPDF, switchFeedbackTab,
+  toggleResponsesFullscreen,
   openSessionQrModal, openEditEnrollModal, saveEnrollDeadline, clearEnrollDeadline,
   markAttendance, toggleAttendancePermission,
   openCertificateModal, saveCertificateName, downloadCertificate
